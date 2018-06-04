@@ -6,21 +6,22 @@ data(forestgap)
 
 
 testmat <- forestgap[[3]]
-
+subsizes <- c(2, 4, 7)
 
 
 context('Test that all indicator functions return correct values')
 
 # Test variance indicator
 test_that("Indicator variance returns correct values", { 
-  
+  skip_on_cran()
+
   varf <- function(mat) var(as.vector(mat))
   
   expect_equal(varf(testmat), 
                indicator_variance(testmat, subsize = 1, 
                                   nreplicates = 0)[["value"]])
   
-  for (subsize in seq.int(10)) { 
+  for (subsize in subsizes) { 
     expect_equal(varf(coarse_grain(testmat, subsize = subsize)), 
                  indicator_variance(testmat, subsize = subsize, 
                                     nreplicates = 0)[["value"]])
@@ -31,7 +32,8 @@ test_that("Indicator variance returns correct values", {
 
 
 test_that("Indicator skewness returns correct values", { 
-  
+  skip_on_cran()
+
   skewf <- function(mat) moments::skewness(as.vector(mat))
   
   expect_equal(skewf(testmat), 
@@ -39,7 +41,7 @@ test_that("Indicator skewness returns correct values", {
                                   absolute = FALSE, 
                                   nreplicates = 0)[["value"]])
   
-  for (subsize in seq.int(10)) { 
+  for (subsize in subsizes) { 
     expect_equal(skewf(coarse_grain(testmat, subsize = subsize)), 
                  indicator_skewness(testmat, subsize = subsize, 
                                     nreplicates = 0,
@@ -50,8 +52,9 @@ test_that("Indicator skewness returns correct values", {
 
 
 
-test_that('Indicator Moran returns a correct value', { 
-  
+test_that('Indicator Moran returns correct values', { 
+  skip_on_cran()
+
   # Test first the raw function
   
   # Moran's I should be -1 for checkboard pattern
@@ -76,6 +79,40 @@ test_that('Indicator Moran returns a correct value', {
 
 
 
+test_that('Indicator psdtype returns correct values', { 
+  skip_on_cran()
+
+  # Test one fit on the whole dataset
+  expect_true(with(indicator_psdtype(forestgap, merge = TRUE), 
+                    as.character(type[best])) == "pl") 
+  
+  # Test individual fits
+  if ( exists("EXTENDED_TESTS") ) { 
+    a <- sapply(indicator_psdtype(forestgap, best_by = 'BIC'), 
+                with, as.character(type[best]))
+    expect_true(all(c(is.na(a[1]), 
+                      a[-1] == c("pl", "pl", "pl", "tpl", "tpl", "tpl", 
+                                "tpl", "exp"))))
+  }
+})
+
+
+
+test_that('Indicator plrange returns correct values', { 
+  skip_on_cran()
+  
+  # Test that workflow function and individual function return the same thing
+  indiv_ic_plrange <- indicator_plrange(forestgap, merge = TRUE)$plrange 
+  workflow_plrange <- patchdistr_sews(forestgap, merge = TRUE)$plrange$plrange
+  
+  expect_true( abs(indiv_ic_plrange - 0.8153096) < 0.001 )
+  expect_true( abs(workflow_plrange - 0.8153096) < 0.001 )
+  expect_true( abs(workflow_plrange - indiv_ic_plrange) < 0.001 )
+  
+})
+
+
+
 
 test_that('Generic indicator task function returns correct values', { 
   
@@ -84,7 +121,7 @@ test_that('Generic indicator task function returns correct values', {
   moran_do_cg <- FALSE
   moran_do_cg <- FALSE
   
-  genindic_result <- generic_spews(testmat, 
+  genindic_result <- generic_sews(testmat, 
                                    subsize = size, 
                                    moranI_coarse_grain = moran_do_cg)
   

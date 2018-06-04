@@ -17,10 +17,12 @@
 #'   "BIC" or "AICc")
 #' 
 #' @param xmin The xmin to be used to fit the patch size distributions. Use 
-#'   the special values "estimate" to use an estimated xmin for each fit
+#'   the special value "estimate" to compute first the xmin that produces 
+#'   the best power-law fit, then use this estimated value to fit all 
+#'   distributions. 
 #' 
 #' @param xmin_bounds Bounds when estimating the xmin for power-law distributions
-#'
+#' 
 #' @param wrap Determines whether patches are considered to wrap around the 
 #'  matrix when reaching the side 
 #' 
@@ -61,7 +63,9 @@
 #' \eqn{exp(\alpha x)}, a truncated power-law and \eqn{x^\lambda exp(\alpha x)},
 #' and optionally, a log-normal. Each distribution parameter is estimated 
 #' using maximum-likelihood, with a minimum patch size (xmin) fixed to one. 
-#' The best distribution is selected based on BIC by default. 
+#' The best distribution is selected based on BIC by default. In raw results, 
+#' \code{expo} refers to the power-law exponent \eqn{\lambda} in the previous 
+#' equations and \code{rate} referes to the exponential decay rate \eqn{\alpha}. 
 #' 
 #' To compute the Power-law range (PLR), power-laws are fitted with a variable 
 #' minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
@@ -71,16 +75,16 @@
 #' \deqn{\frac{log(x_{max}) - log(x_{min})}{log(x_{max}) - log(x_{smallest})}}{ (log(xmax) - log(xmin))/(log(xmax) - log(xsmallest))}
 #' 
 #' Results can be displayed using the text-based \code{summary} and \code{print}, 
-#'   but graphical options are also available to plot the trends (\code{plot}) and 
-#'   the fitted distributions (\code{plot_distr}). Plotting functions are 
-#'   documented in a \link[=patchdistr_spews_plot]{separate page}. Observed and 
-#'   fitted distributions can be produced using the \code{predict} function, 
-#'   as documented in \link[=patchdistr_spews_predict]{this page}. 
+#' but graphical options are also available to plot the trends (\code{plot}) and 
+#' the fitted distributions (\code{plot_distr}). Plotting functions are 
+#' documented in a \link[=patchdistr_sews_plot]{separate page}. Observed and 
+#' fitted distributions can be produced using the \code{predict} function, 
+#' as documented in \link[=patchdistr_sews_predict]{this page}. 
 #' 
 #' @seealso \code{\link{indicator_psdtype}}, \code{\link{patchsizes}}, 
-#'   \code{\link[=patchdistr_spews_plot]{plot}}, 
-#'   \code{\link[=patchdistr_spews_plot]{plot_distr}}, 
-#'   \code{\link[=patchdistr_spews_predict]{predict}}
+#'   \code{\link[=patchdistr_sews_plot]{plot}}, 
+#'   \code{\link[=patchdistr_sews_plot]{plot_distr}}, 
+#'   \code{\link[=patchdistr_sews_predict]{predict}}
 #' 
 #' @references 
 #' 
@@ -102,7 +106,7 @@
 #' data(forestgap)
 #' 
 #' \dontrun{
-#' psd_indic <- patchdistr_spews(forestgap)
+#' psd_indic <- patchdistr_sews(forestgap)
 #' 
 #' summary(psd_indic)
 #' plot(psd_indic)
@@ -112,24 +116,29 @@
 #'   plot(psd_indic) + 
 #'     theme_minimal()
 #' }
+#' 
+#' # Export results to a data.frame
+#' psd_indic_export <- as.data.frame(psd_indic) 
+#' head(psd_indic_export)
+#' 
 #' }
 #' @export
-patchdistr_spews <- function(x, 
-                             merge = FALSE,
-                             fit_lnorm = FALSE,
-                             best_by = "BIC", 
-                             xmin = 1, # "est" option
-                             xmin_bounds = NULL, 
-                             wrap = FALSE) {
+patchdistr_sews <- function(x, 
+                            merge = FALSE,
+                            fit_lnorm = FALSE,
+                            best_by = "BIC", 
+                            xmin = 1, # a number, or "estimate" option
+                            xmin_bounds = NULL, 
+                            wrap = FALSE) {
   
   check_mat(x) # Check input matrix
   
   # If input is a list -> apply on each element
   if ( !merge & is.list(x)) { 
-    results <- parallel::mclapply(x, patchdistr_spews, merge, fit_lnorm, 
+    results <- parallel::mclapply(x, patchdistr_sews, merge, fit_lnorm, 
                                   best_by, xmin, xmin_bounds, wrap)
-    class(results) <- c('patchdistr_spews_list', 'patchdistr_spews', 
-                        'spews_result_list', 'list')
+    class(results) <- c('patchdistr_sews_list', 'patchdistr_sews', 
+                        'sews_result_list', 'list')
     return(results)
   } 
   
@@ -159,17 +168,24 @@ patchdistr_spews <- function(x,
     percol_empty <- percolation(!x)
   } 
   
+  # Compute the mean cover 
+  if ( is.list(x) ) { 
+    meancover <- mean(laply(x, mean))
+  } else { 
+    meancover <- mean(x)
+  }
+  
   # Return object 
   result <- list(psd_obs = sort(psd), 
                  psd_type = psdtype(psd, xmin, best_by, fit_lnorm),
                  percolation = percol,
                  percolation_empty = percol_empty,
-                 cover = mean(x),
+                 cover = meancover,
                  plrange = plr_est, 
                  npatches = length(psd),
                  unique_patches = length(unique(psd)))
-  class(result) <- c('patchdistr_spews_single', 'patchdistr_spews', 
-                     'spews_result_single', 'list')
+  class(result) <- c('patchdistr_sews_single', 'patchdistr_sews', 
+                     'sews_result_single', 'list')
   
   return(result)
 }

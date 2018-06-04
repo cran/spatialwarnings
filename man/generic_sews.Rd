@@ -2,22 +2,22 @@
 % Please edit documentation in R/task_generic_indic.R,
 %   R/task_generic_indic_indictest.R, R/task_generic_indic_indictest_methods.R,
 %   R/task_generic_indic_methods.R
-\name{generic_spews}
-\alias{generic_spews}
-\alias{indictest.generic_spews}
-\alias{plot.generic_spews_test}
-\alias{plot.generic_spews}
+\name{generic_sews}
+\alias{generic_sews}
+\alias{indictest.generic_sews}
+\alias{plot.generic_sews_test}
+\alias{plot.generic_sews}
 \title{Generic Spatial Early-Warning signals}
 \usage{
-generic_spews(mat, subsize = 4, abs_skewness = FALSE,
+generic_sews(mat, subsize = 4, abs_skewness = FALSE,
   moranI_coarse_grain = FALSE)
 
-\method{indictest}{generic_spews}(x, nperm = 999, ...)
+\method{indictest}{generic_sews}(x, nperm = 999, ...)
 
-\method{plot}{generic_spews_test}(x, along = NULL, what = "value",
+\method{plot}{generic_sews_test}(x, along = NULL, what = "value",
   display_null = TRUE, ...)
 
-\method{plot}{generic_spews}(x, along = NULL, ...)
+\method{plot}{generic_sews}(x, along = NULL, ...)
 }
 \arguments{
 \item{mat}{A matrix (quantitative data), a binary matrix (TRUE/FALSE data), 
@@ -31,8 +31,8 @@ raw values ?}
 \item{moranI_coarse_grain}{Should the input matrix be coarse-grained before
 computing the Moran's I indicator value ?}
 
-\item{x}{A \code{generic_spews} object (as provided by the 
-\code{generic_spews} function).}
+\item{x}{A \code{generic_sews} object (as provided by the 
+\code{generic_sews} function).}
 
 \item{nperm}{The number of replicates to use to compute a null 
 distribution}
@@ -53,9 +53,9 @@ line reflects something else than the indicator values (when \code{what}
 is not set to "value").}
 }
 \value{
-\code{generic_spews} returns an object of class \code{generic_spews_single}
+\code{generic_sews} returns an object of class \code{generic_sews_single}
   (actually a list) if mat is a single matrix or an object of class 
-  \code{generic_spews_list} if mat is a list. 
+  \code{generic_sews_list} if mat is a list. 
 
 \code{indictest} returns an object of class \code{generic_test} (actually 
   a data.frame). 
@@ -101,7 +101,7 @@ Note that the produced plot is adjusted depending on whether
 \examples{
 
 data(serengeti)
-gen_indic <- generic_spews(serengeti, subsize = 5, 
+gen_indic <- generic_sews(serengeti, subsize = 5, 
                            moranI_coarse_grain = TRUE)
 
 # Display results

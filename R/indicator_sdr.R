@@ -44,7 +44,7 @@
 #' SDR measures the increase in long-range correlations before a critical point. 
 #'   It is the ratio of the average low frequency value over high frequency 
 #'   values. In this implementation, an increase in SDR implies a "reddening" 
-#'   of the \link[=rspectrum]{r-spectrum}. See also \code{\link{spectral_spews}} for 
+#'   of the \link[=rspectrum]{r-spectrum}. See also \code{\link{spectral_sews}} for 
 #'   a more complete description. 
 #' 
 #' Low and high frequencies are averaged in order to compute the SDR. The 
@@ -54,7 +54,7 @@
 #'   the average of low frequencies. \code{sdr_high_range = c(.8, 1)} uses the 
 #'   higher 20% for the average of high frequencies. 
 #' 
-#' @seealso spectral_spews, rspectrum
+#' @seealso spectral_sews, rspectrum
 #' 
 #' @references 
 #' 
@@ -131,6 +131,12 @@ indicator_sdr_do_ratio <- function(spectrum, low_range, high_range) {
                                   dist >= min(low_range))
   high_subset <- with(spectrum, dist <= max(high_range) & 
                                   dist >= min(high_range))
+  
+  # If the number of values to estimate means is very low, then warn. 
+  if ( sum(low_subset) < 3 || sum(high_subset) < 3 ) { 
+    warning('The number of values used to compute the SDR ratio is very low ', 
+            'it may be unreliable')
+  }
   
   # Return ratio of means
   return( with(spectrum, mean(rspec[low_subset]) / mean(rspec[high_subset])) )

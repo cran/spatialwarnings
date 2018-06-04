@@ -51,6 +51,10 @@ label <- function(mat,
          '(TRUE/FALSE values): please convert your data first.')
   }
   
+  if ( ! is.matrix(mat) ) { 
+    stop('The input object must be a matrix')
+  }
+  
   # The matrix is full
   if ( all(mat) ) { 
     result <- matrix(1, nrow = nrow(mat), ncol = ncol(mat)) 
@@ -64,6 +68,28 @@ label <- function(mat,
     result <- matrix(NA, nrow = nrow(mat), ncol = ncol(mat)) 
     attr(result, "psd") <- integer(0)
     attr(result, "percolation") <- FALSE
+    return(result)
+  }
+  
+  # The matrix is a row/column vector 
+  if ( ncol(mat) == 1 || nrow(mat) == 1 ) { 
+    vec <- as.vector(mat)
+    result <- cumsum( c(vec[1] > 0, diff(vec)) == 1 ) * vec
+    result <- ifelse(result > 0, result, NA)
+    # If we wrap, then we need to merge the two patches at the end of the vector
+    if ( wrap && !is.na(head(result, 1)) && !is.na(tail(result, 1)) ) { 
+      result[ result == tail(result, 1) ] <- head(result, 1)
+    }
+    
+    # PSD is the just the number of times each unique values appears in the 
+    # result vector. 
+    attr(result, "psd") <- tabulate(result)
+    # Adjust dimensions
+    dim(result) <- dim(mat)
+    
+    # If there is a patch, then it necessarily has the width or height 
+    # of the matrix, so percolation is present. 
+    attr(result, "percolation") <- any(mat)
     return(result)
   }
   
@@ -96,9 +122,10 @@ percolation <- function(mat, nbmask = matrix(c(0,1,0,
 #' @param merge Controls whether the obtained patch size distributions are to 
 #'   be pooled together if mat is a list of matrices. 
 #' 
-#' @param nbmask a "neighboring mask": a matrix with odd dimensions describing
-#'   which neighbors are to be considered as neighbors around a cell 
-#'   (see examples).
+#' @param nbmask a square matrix with an odd number of lines and columns that 
+#'   describes which neighbors are to be considered around a cell. Default 
+#'   is 4-way neighborhood (the neighborhood of a cell comprises the cell 
+#'   above, below, on the right and on the left of the target cell). 
 #' 
 #' @param wrap Whether to wrap around lattice boundaries (`TRUE`/`FALSE`), 
 #'   effectively using periodic boundaries.
@@ -110,15 +137,27 @@ percolation <- function(mat, nbmask = matrix(c(0,1,0,
 #' @seealso \code{\link{label}}
 #' 
 #' @examples
+#' 
 #' data(forestgap)
-#' patchsizes(forestgap[[5]])
+#' patchsizes(forestgap[[5]]) # Use a single matrix
+#' 
+#' # Compute the average patch size of each matrix
+#' list_patches <- patchsizes(forestgap) # get the patch size for each matrix
+#' print( sapply(list_patches, mean)) # print the average patch size 
+#' 
+#' # Example with 8-way neighborhood
+#' nbmask8 <- matrix(c(1,1,1,
+#'                     1,0,1,
+#'                     1,1,1), ncol = 3)
+#' patchsizes(forestgap[[5]], nbmask = nbmask8)
+#' 
 #'
 #' @export
 patchsizes <- function(mat, 
                        merge = FALSE,
                        nbmask = matrix(c(0,1,0,
                                          1,0,1,
-                                         0,1,0), ncol=3), # 4way NB 
+                                         0,1,0), ncol = 3), # 4way neighborhood
                        wrap = FALSE) { 
   
   if ( is.list(mat)) { 
