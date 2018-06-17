@@ -76,6 +76,7 @@
 #'   Transitions: Methods for Spatial Patterns. PLoS ONE, 9, e92097.
 #' 
 #' @examples
+#' \dontrun{
 #' 
 #' data(serengeti) 
 #' data(serengeti.rain) 
@@ -94,7 +95,6 @@
 #' # computing using: options(mc.cores = n)
 #' 
 #' # Assess significance
-#' \dontrun{
 #' spec_test <- indictest(spec_indic)
 #' summary(spec_test)
 #' 
@@ -108,7 +108,6 @@
 #'     geom_vline(xintercept = 590, color = "red", linetype = "dashed")
 #' }
 #' 
-#' }
 #' 
 #' # Display radial-spectra
 #' plot_spectrum(spec_indic, along = serengeti.rain)
@@ -119,6 +118,7 @@
 #'     scale_y_log10()
 #' }
 #' 
+#' }
 #' @export
 spectral_sews <- function(mat, 
                            sdr_low_range  = NULL, 

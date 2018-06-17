@@ -100,6 +100,7 @@ The trend of SDR values can be plotted using the \code{plot()} method.
   method.
 }
 \examples{
+\dontrun{
 
 data(serengeti) 
 data(serengeti.rain) 
@@ -118,7 +119,6 @@ plot(spec_indic, along = serengeti.rain)
 # computing using: options(mc.cores = n)
 
 # Assess significance
-\dontrun{
 spec_test <- indictest(spec_indic)
 summary(spec_test)
 
@@ -132,7 +132,6 @@ if (require(ggplot2)) {
     geom_vline(xintercept = 590, color = "red", linetype = "dashed")
 }
 
-}
 
 # Display radial-spectra
 plot_spectrum(spec_indic, along = serengeti.rain)
@@ -143,6 +142,7 @@ if (require(ggplot2)) {
     scale_y_log10()
 }
 
+}
 }
 \references{
 Kefi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 

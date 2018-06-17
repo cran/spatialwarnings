@@ -1,7 +1,7 @@
 Package: spatialwarnings
 Type: Package
 Title: Spatial Early Warning Signals of Ecosystem Degradation
-Version: 1.1
+Version: 1.2
 Author: Alain Danet, Alexandre Genin, Vishwesha Guttal, Sonia Kefi,
   Sabiha Majumder, Sumithra Sankaran, Florian Schneider
 License: MIT + file LICENSE
@@ -16,6 +16,6 @@ LinkingTo: Rcpp, RcppArmadillo
 LazyData: true
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-06-04 08:29:05 UTC; alex
+Packaged: 2018-06-17 22:13:58 UTC; alex
 Repository: CRAN
-Date/Publication: 2018-06-04 09:03:18 UTC
+Date/Publication: 2018-06-17 22:37:54 UTC
