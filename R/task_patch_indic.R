@@ -52,7 +52,7 @@
 #'   - The patch-size distribution is closer to an exponential 
 #'   distribution
 #' 
-#' Additionnally, it has been suggested that these changes in patch size 
+#' Additionally, it has been suggested that these changes in patch size 
 #' distribution shape should be reflected in the power-law range (PLR). This 
 #' function carries out all the required computations and helps display 
 #' the results in a convenient form. 
@@ -136,7 +136,7 @@ patchdistr_sews <- function(x,
   # If input is a list -> apply on each element
   if ( !merge & is.list(x)) { 
     results <- parallel::mclapply(x, patchdistr_sews, merge, fit_lnorm, 
-                                  best_by, xmin, xmin_bounds, wrap)
+                                   best_by, xmin, xmin_bounds, wrap)
     class(results) <- c('patchdistr_sews_list', 'patchdistr_sews', 
                         'sews_result_list', 'list')
     return(results)

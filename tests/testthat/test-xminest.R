@@ -1,12 +1,10 @@
 
 context('Test that xmin estimations are correct')
 
-# We do not test on CRAN because this requires compilation of external code. 
-TEST_XMIN <- FALSE
 GRAPHICAL <- FALSE # Plot some diagnostics. 
 
 
-if ( TEST_XMIN ) { 
+if ( exists('EXTENDED_TESTS') && EXTENDED_TESTS ) { 
   # Change dir if running tests manually
   if ( file.exists('./tests/testthat') ) { 
     library(testthat)
@@ -29,9 +27,9 @@ if ( TEST_XMIN ) {
   test_that("xmins estimation is correct", { 
     
 
-    parms <- expand.grid(expo = 1.5, 
-                         rate = c(0.001, 0.005, 0.01, 0.1, 0.2, 0.3, 0.5, 
-                                      0.7, 1, 1.2, 1.3, 1.4, 1.5, 1.7, 1.8, 2))
+    parms <- expand.grid(expo = c(1.5, 1.3, 1.2), 
+                         rate = c(0.001, 0.005, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 
+                                  0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
     
     estim_xmin <- function(df) { 
       
@@ -42,13 +40,14 @@ if ( TEST_XMIN ) {
       # Create pl object and estimate its xmin
       pl_obj <- poweRlaw::displ$new(pldat)
       est_xmin_plpkg <- poweRlaw::estimate_xmin(pl_obj)[["xmin"]]
-      cat(est_xmin_plpkg, ' -> ', est_xmin, " [", 
-          length(unique(pldat)), "]", "\n", sep = "")
+      cat(" Ours: ", est_xmin_plpkg, ' -> poweRlaw\'s: ', est_xmin, " [", 
+          length(unique(pldat)), " unique patches]", "\n", sep = "")
       
-      if ( !is.na(est_xmin) && !is.na(est_xmin_plpkg) ) { 
+      if ( !is.na(est_xmin) && !is.na(est_xmin_plpkg) && 
+           length(unique(pldat)) > 5 ) { 
         # Note: In some pathological cases (few unique patches), there can be 
-        # a small difference in xmin. So we have an acceptable error here. 
-        expect_true( abs(est_xmin - est_xmin_plpkg) <= 2 )
+        # a small difference in xmin, so we use an acceptable error here. 
+        expect_true( abs(est_xmin - est_xmin_plpkg) <= 1 )
         
         # In this case, inspect the fit provided by the poweRlaw package
         if ( GRAPHICAL && est_xmin != est_xmin_plpkg ) { 

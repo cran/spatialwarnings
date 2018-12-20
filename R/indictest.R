@@ -17,15 +17,15 @@
 #' 
 #' @param ... Additional arguments passed to methods 
 #' 
-#' @return An object of class \code{*_sews_test} depending on the input object
-#'   (actually, a data.frame)
-#'
+#' @return An object of class ending in \code{*_sews_test}, whose exact class 
+#'   depends on the input object (in reality a data.frame)
+#' 
 #' @details 
 #' 
 #' The significance of many early-warning signals can be estimated by 
 #'   reshuffling the original matrix. Indicators are then recomputed 
 #'   on the shuffled matrices and the values obtained are used as a null 
-#'   distribution. P-values are obtained based on the rank of the observered
+#'   distribution. P-values are obtained based on the rank of the observed
 #'   value in the null distribution. 
 #' 
 #' @seealso \code{\link{generic_sews}}, \code{\link{spectral_sews}}

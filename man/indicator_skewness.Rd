@@ -4,7 +4,8 @@
 \alias{indicator_skewness}
 \title{Skewness indicator}
 \usage{
-indicator_skewness(input, subsize = 5, absolute = TRUE, nreplicates = 999)
+indicator_skewness(input, subsize = 5, absolute = TRUE,
+  nreplicates = 999)
 }
 \arguments{
 \item{input}{A matrix or a list of matrices. The matrix 
@@ -44,7 +45,7 @@ A list (or a list of lists if input was a list of matrices) with
     }
 }
 \description{
-This functions computes the spatial skewness of spatial data. 
+Compute the spatial skewness of spatial data. 
   It also computes a null value obtained by randomizing 
   the matrix.
 }

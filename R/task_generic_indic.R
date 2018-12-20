@@ -5,7 +5,7 @@
 
 #' @title Generic Spatial Early-Warning signals
 #' 
-#' @description Computation, significance assesment and display of spatial 
+#' @description Computation, significance assessment and display of spatial 
 #'   generic early warning signals (Moran's I, variance and skewness)
 #' 
 #' @param mat A matrix (quantitative data), a binary matrix (TRUE/FALSE data), 
@@ -46,14 +46,14 @@
 #'   a square window defined by the \code{subsize} parameter. This makes spatial  
 #'   variance and skewness reflect actual spatial patterns when working with 
 #'   binary (\code{TRUE}/\code{FALSE} data), but is optional when using 
-#'   continous data. Keep in mind that it effectively reduces the size of 
+#'   continuous data. Keep in mind that it effectively reduces the size of 
 #'   the matrix by approximately \code{subsize} on each dimension. 
 #'   
 #' The significance of generic early-warning signals can be estimated by 
 #'   reshuffling the original matrix (function \code{indictest}). Indicators 
 #'   are then recomputed on the shuffled matrices and the values obtained are 
 #'   used as a null distribution. P-values are obtained based on the rank of 
-#'   the observered value in the null distribution. A small P-value means 
+#'   the observed value in the null distribution. A small P-value means 
 #'   that the indicator is significantly above the null values, as expected 
 #'   before a critical point. 
 #'
@@ -92,7 +92,7 @@
 #' 
 #' # Compute significance (long)
 #' \dontrun{
-#' gen_test <- indictest(gen_indic)
+#' gen_test <- indictest(gen_indic, nperm = 199)
 #' 
 #' print(gen_test)
 #' 
@@ -107,7 +107,7 @@
 #' # for convenience
 #' if ( require(ggplot2) ) { 
 #'   plot(gen_test, along = serengeti.rain) + 
-#'     geom_vline(xintercept = 593, color = "red", linetype = "dashed") +
+#'     geom_vline(xintercept = 733, color = "red", linetype = "dashed") +
 #'     xlab('Annual rainfall') + 
 #'     theme_minimal()
 #' }
@@ -133,7 +133,7 @@ generic_sews <- function(mat,
     return(results)
   }
   
-  # Warn if the matrix is continous but we will coarse grain anyway
+  # Warn if the matrix is continuous but we will coarse grain anyway
   if ( is.numeric(mat) && subsize > 1 ) { 
     warning(paste('Input matrix has continous values but will be coarse-grained', 
                   'anyway. Set subsize=1 to disable coarse graining.'))
@@ -148,6 +148,7 @@ generic_sews <- function(mat,
   #   above options. 
   indicf <- function(mat) { 
     
+    # We do coarse-graining only once for the whole matrix
     mat_cg <- coarse_grain(mat, subsize)
     
     if ( sd(as.vector(mat_cg)) == 0 ) { 
@@ -157,15 +158,15 @@ generic_sews <- function(mat,
                 mean     = mean(mat)) )
     }
     
+    skewness_value <- cpp_skewness(mat_cg)
+    if (abs_skewness) { 
+      skewness_value <- abs(skewness_value)
+    }
+    
     if (moranI_coarse_grain) { 
       moran_value <- raw_moran(mat_cg) 
     } else { 
       moran_value <- raw_moran(mat)
-    }
-    
-    skewness_value <- raw_skewness(mat_cg)
-    if (abs_skewness) { 
-      skewness_value <- abs(skewness_value)
     }
     
     c(variance = var(as.vector(mat_cg)),

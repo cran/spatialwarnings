@@ -64,7 +64,7 @@ is not set to "value").}
   when used interactively.
 }
 \description{
-Computation, significance assesment and display of spatial 
+Computation, significance assessment and display of spatial 
   generic early warning signals (Moran's I, variance and skewness)
 }
 \details{
@@ -81,14 +81,14 @@ Before computing the actual indicators, the matrix can be "coarse-grained".
   a square window defined by the \code{subsize} parameter. This makes spatial  
   variance and skewness reflect actual spatial patterns when working with 
   binary (\code{TRUE}/\code{FALSE} data), but is optional when using 
-  continous data. Keep in mind that it effectively reduces the size of 
+  continuous data. Keep in mind that it effectively reduces the size of 
   the matrix by approximately \code{subsize} on each dimension. 
   
 The significance of generic early-warning signals can be estimated by 
   reshuffling the original matrix (function \code{indictest}). Indicators 
   are then recomputed on the shuffled matrices and the values obtained are 
   used as a null distribution. P-values are obtained based on the rank of 
-  the observered value in the null distribution. A small P-value means 
+  the observed value in the null distribution. A small P-value means 
   that the indicator is significantly above the null values, as expected 
   before a critical point. 
 
@@ -112,7 +112,7 @@ plot(gen_indic, along = serengeti.rain)
 
 # Compute significance (long)
 \dontrun{
-gen_test <- indictest(gen_indic)
+gen_test <- indictest(gen_indic, nperm = 199)
 
 print(gen_test)
 
@@ -127,7 +127,7 @@ plot(gen_test, along = serengeti.rain, what = "z_score")
 # for convenience
 if ( require(ggplot2) ) { 
   plot(gen_test, along = serengeti.rain) + 
-    geom_vline(xintercept = 593, color = "red", linetype = "dashed") +
+    geom_vline(xintercept = 733, color = "red", linetype = "dashed") +
     xlab('Annual rainfall') + 
     theme_minimal()
 }

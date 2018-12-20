@@ -9,11 +9,7 @@ library(ggplot2)
 
 context('Test the fitting of distributions')
 
-# Do not run this test automatically as compilation can fail on other 
-# computers (e.g. when the gsl is absent). 
-TEST_PSDFIT <- FALSE
-
-if ( TEST_PSDFIT ) { 
+if ( exists("EXTENDED_TESTS") && EXTENDED_TESTS ) { 
   
   # Change dir if running tests manually
   if ( file.exists('./tests/testthat') ) { 
@@ -35,7 +31,8 @@ if ( TEST_PSDFIT ) {
             chmod +x discpowerexp")
   
   test_that('PL fitting works', { 
-    
+    skip_on_cran()
+
     expos <- c(1.2, 1.5, 2.5)
     xmins <- c(1,  10, 100)
     for ( expo in expos ) { 
@@ -79,7 +76,7 @@ if ( TEST_PSDFIT ) {
     }
     
   })
-
+  
   test_that('EXP fitting works', { 
     
     rates <- c(1.1, 1.5)  
@@ -224,8 +221,8 @@ if ( TEST_PSDFIT ) {
           
           if ( !is.null(clauset_fit) ) { 
 #             if ( ! (our_fit$ll < clauset_fit$loglike) ) { 
-              expect_equal(our_fit$expo, clauset_fit$exponent, tol = 5e-3)
-              expect_equal(our_fit$rate, clauset_fit$rate, tol = 5e-3)
+              expect_equal(our_fit$expo, clauset_fit$exponent, tol = 1e-2)
+              expect_equal(our_fit$rate, clauset_fit$rate, tol = 1e-2)
 #             }
           
           # Look at fit
@@ -285,7 +282,7 @@ if ( TEST_PSDFIT ) {
   system("cd ./pli-R-v0.0.3-2007-07-25/zeta-function/ && rm zeta_func zeta_func.o")
   system("cd ./pli-R-v0.0.3-2007-07-25/exponential-integral/ && rm exp_int exp_int.o")
   system("cd ./pli-R-v0.0.3-2007-07-25/ && rm discpowerexp")
-
+  
 } else { 
   message("Skipping psd-fitting tests")
 }

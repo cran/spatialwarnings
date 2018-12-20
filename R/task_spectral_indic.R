@@ -61,7 +61,7 @@
 #'   reshuffling the original matrix (function \code{indictest}). Indicators 
 #'   are then recomputed on the shuffled matrices and the values obtained are 
 #'   used as a null distribution. P-values are obtained based on the rank of 
-#'   the observered value in the null distribution. 
+#'   the observed value in the null distribution. 
 #' 
 #' The trend of SDR values can be plotted using the \code{plot()} method. 
 #'   Alternatively, the spectrum itself can be plotted (with facets 
@@ -95,7 +95,7 @@
 #' # computing using: options(mc.cores = n)
 #' 
 #' # Assess significance
-#' spec_test <- indictest(spec_indic)
+#' spec_test <- indictest(spec_indic, nperm = 199)
 #' summary(spec_test)
 #' 
 #' # Display the SDR trend, now with a grey ribbon representing 5%-95% 
@@ -148,7 +148,8 @@ spectral_sews <- function(mat,
   
   # Handle list case
   if ( is.list(mat) ) { 
-    results <- lapply(mat, spectral_sews, sdr_low_range, sdr_high_range, quiet)
+    results <- lapply(mat, spectral_sews, sdr_low_range, 
+                      sdr_high_range, quiet)
     names(results) <- names(mat)
     class(results) <- c('spectral_sews_list',  'spectral_sews', 
                         'sews_result_list', 'list')

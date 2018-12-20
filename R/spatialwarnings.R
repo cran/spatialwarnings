@@ -20,7 +20,7 @@
 #'  
 #'  This package implements the computation of these indicators, or 
 #'  \emph{early-warning signals} (EWS), on spatial raster data. High-level 
-#'  functions and methods provide familar workflows to compute the indicators 
+#'  functions and methods provide familiar workflows to compute the indicators 
 #'  and display their variations along environmental gradients or time-series. 
 #'  Lower-level functions are also available to integrate early-warning signals 
 #'  in a different workflow. 
@@ -43,6 +43,11 @@
 #'    \item \code{\link{indicator_psdtype}}: Patch-size distribution shape 
 #'    \item \code{\link{indicator_plrange}}: Power-law range
 #'  }
+#' 
+#' The package home page is available at [Github]https://github.com/spatial-ews/spatialwarnings
+#' and a [FAQ covering technical issues](https://alex.lecairn.org/spatialwarnings-faq.html) is 
+#' also available. 
+#' 
 #' 
 #' @docType package
 #' @name spatialwarnings

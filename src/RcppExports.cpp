@@ -31,6 +31,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fl_internal
+double fl_internal(arma::mat m);
+RcppExport SEXP _spatialwarnings_fl_internal(SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(fl_internal(m));
+    return rcpp_result_gen;
+END_RCPP
+}
 // label_cpp
 IntegerMatrix label_cpp(IntegerMatrix mat, IntegerMatrix nbmask, bool wrap);
 RcppExport SEXP _spatialwarnings_label_cpp(SEXP matSEXP, SEXP nbmaskSEXP, SEXP wrapSEXP) {
@@ -45,12 +56,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // raw_moran
-double raw_moran(NumericMatrix mat);
+double raw_moran(arma::mat& mat);
 RcppExport SEXP _spatialwarnings_raw_moran(SEXP matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type mat(matSEXP);
     rcpp_result_gen = Rcpp::wrap(raw_moran(mat));
     return rcpp_result_gen;
 END_RCPP
@@ -104,14 +115,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// raw_skewness
-double raw_skewness(arma::vec X);
-RcppExport SEXP _spatialwarnings_raw_skewness(SEXP XSEXP) {
+// cpp_skewness
+double cpp_skewness(arma::vec X);
+RcppExport SEXP _spatialwarnings_cpp_skewness(SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(raw_skewness(X));
+    rcpp_result_gen = Rcpp::wrap(cpp_skewness(X));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -144,13 +155,14 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_spatialwarnings_coarse_grain_cpp", (DL_FUNC) &_spatialwarnings_coarse_grain_cpp, 2},
     {"_spatialwarnings_discpowerexp_norm", (DL_FUNC) &_spatialwarnings_discpowerexp_norm, 3},
+    {"_spatialwarnings_fl_internal", (DL_FUNC) &_spatialwarnings_fl_internal, 1},
     {"_spatialwarnings_label_cpp", (DL_FUNC) &_spatialwarnings_label_cpp, 3},
     {"_spatialwarnings_raw_moran", (DL_FUNC) &_spatialwarnings_raw_moran, 1},
     {"_spatialwarnings_tplsum", (DL_FUNC) &_spatialwarnings_tplsum, 4},
     {"_spatialwarnings_shuffle_matrix", (DL_FUNC) &_spatialwarnings_shuffle_matrix, 1},
     {"_spatialwarnings_shuffle_and_compute", (DL_FUNC) &_spatialwarnings_shuffle_and_compute, 3},
     {"_spatialwarnings_rspectrum", (DL_FUNC) &_spatialwarnings_rspectrum, 1},
-    {"_spatialwarnings_raw_skewness", (DL_FUNC) &_spatialwarnings_raw_skewness, 1},
+    {"_spatialwarnings_cpp_skewness", (DL_FUNC) &_spatialwarnings_cpp_skewness, 1},
     {"_spatialwarnings_sum_all_one_over_k", (DL_FUNC) &_spatialwarnings_sum_all_one_over_k, 3},
     {"_spatialwarnings_sum_all_one_over_k_before", (DL_FUNC) &_spatialwarnings_sum_all_one_over_k_before, 2},
     {NULL, NULL, 0}
