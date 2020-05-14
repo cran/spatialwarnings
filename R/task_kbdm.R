@@ -40,7 +40,8 @@
 #' @param subsize A submatrix size to carry out the Block Decomposition Method
 #'   (must be between 1 and 3)
 #' 
-#' @seealso \code{\link{raw_kbdm}}, \code{\link[acss]{acss}}
+#' @seealso \code{\link{raw_kbdm}}, \code{\link[acss]{acss}}, 
+#'   \code{\link{indictest}}, to test the significance of indicator values. 
 #' 
 #' @examples 
 #' 
@@ -49,43 +50,21 @@
 #' kbdm_result <- kbdm_sews(serengeti, subsize = 3)
 #' plot(kbdm_result, along = serengeti.rain)
 #' 
-#' kbdm_test <- indictest(kbdm_result, nperm = 99)
+#' kbdm_test <- indictest(kbdm_result, nulln = 49)
 #' plot(kbdm_test, along = serengeti.rain)
 #' 
-#' # Plot deviation to a random matrix
+#' # Plot deviation to null expectation
 #' plot(kbdm_test, along = serengeti.rain, what = "z_score") 
 #' 
 #' }
 #' 
 #' 
 #'@export 
-kbdm_sews <- function(mat, 
-                      subsize = 3) { 
-  
-  # This is a formatted function to compute the kbdm
-  kbdmfun <- function(mat, subsize) { 
-    result <- list(value     = raw_kbdm(mat, subsize), 
-                   orig_data = mat, 
-                   fun.args  = list(subsize = subsize), 
-                   indicf    = raw_kbdm)
-    
-    class(result) <- c('kbdm_sews', 'simple_sews_single', 'list')
-    attr(result, "indicname") <- "Kbdm Complexity"
-    return(result)
-  }
-  
-  if ( is.list(mat) ) { 
-    result <- parallel::mclapply(mat, kbdmfun, subsize)
-    names(result) <- names(mat)
-    class(result) <- c('kbdm_sews', 'simple_sews_list', 'list')
-    attr(result, "indicname") <- "Kbdm Complexity"
-  } else { 
-    result <- kbdmfun(mat, subsize)
-  }
-  
-  return(result)
-
+kbdm_sews <- function(mat, subsize = 3) { 
+    compute_indicator(mat, raw_kbdm, subsize = subsize, 
+                      taskname = "Kbdm Complexity")
 }
+
 
 
 # This function takes a matrix and a returns a single value.
@@ -120,7 +99,7 @@ kbdm_sews <- function(mat,
 #' }
 #' 
 #'@export
-raw_kbdm <- function(mat, subsize = 3) {
+raw_kbdm <- function(mat, subsize) {
   
   if ( ! requireNamespace("acss") ) { 
     stop(paste0('Computation of kbdm requires the package acss. Install it ', 
@@ -152,6 +131,6 @@ raw_kbdm <- function(mat, subsize = 3) {
                        kctm = acss::acss(names(counts), alphabet = 2)[ ,1])
   
   # Compute Kbdm
-  return( with(counts, sum(log2(multip) + kctm)) )
+  return( c(kbdm = with(counts, sum(log2(multip) + kctm))) )
 }
   

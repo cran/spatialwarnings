@@ -34,7 +34,7 @@ pval_stars <- function(value, NA_ret = NA) {
   }
 }
 
-# Format pvalues to reflect the number of replicates instead of printing a 
+# Format pvalues to reflect the number of null values instead of printing a 
 # 0 when it is below what's detectable. 
 format_pvalues <- function(X, nreps) { 
   ifelse(X == 0, 
@@ -70,4 +70,27 @@ display_size_info.sews_result_list <- display_size_info.list <- function(x) {
       length(x), ' ', 
       ifelse(length(x)>1, 'matrices', 'matrix'), ' ',
       "(", size_text_report,')\n', sep = '')
+}
+
+ifNULLthen <- function(a, b) { 
+  if (is.null(a)) b else a 
+}
+
+list_methods <- function(class, 
+                         exclude = c("print", "display_size_info")) { 
+  all_methods <- lapply(class, function(class) { 
+    tab <- attr(methods(class = class), "info")
+    tab[tab[ ,"from"] == "spatialwarnings", "generic"]
+  })
+  all_methods <- sort(unique(unlist(all_methods)))
+  
+  # For _test_ objects, we do not report indictest
+  if ( any(grepl("_sews_test_", class)) ) { 
+    all_methods <- all_methods[!grepl("indictest", all_methods)]
+  }
+  
+  # Exclude some reported methods 
+  all_methods <- all_methods[! all_methods %in% exclude]
+  
+  return(all_methods)
 }

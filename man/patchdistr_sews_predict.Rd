@@ -5,8 +5,7 @@
 \alias{predict.patchdistr_sews_single}
 \title{predict method for patchdistr_sews objects}
 \usage{
-\method{predict}{patchdistr_sews_single}(object, ..., newdata = NULL,
-  best_only = FALSE)
+\method{predict}{patchdistr_sews_single}(object, ..., newdata = NULL, best_only = FALSE)
 }
 \arguments{
 \item{object}{An \code{\link{patchdistr_sews}} object}
@@ -44,7 +43,5 @@ predict(patch_indics)
 
 }
 \seealso{
-\code{\link{patchdistr_sews}}, 
-  \code{\link[=patchdistr_sews_plot]{plot}}, 
-  \code{\link[=patchdistr_sews_plot]{plot_distr}},
+\code{\link{patchdistr_sews}}
 }

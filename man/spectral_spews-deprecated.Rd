@@ -2,10 +2,9 @@
 % Please edit documentation in R/deprecation.R
 \name{spectral_spews}
 \alias{spectral_spews}
-\title{(DEPRECATED) Spectrum-based spatial early-warning signals.}
+\title{(DEFUNCT) Spectrum-based spatial early-warning signals.}
 \usage{
-spectral_spews(mat, sdr_low_range = NULL, sdr_high_range = NULL,
-  quiet = FALSE)
+spectral_spews(mat, sdr_low_range = NULL, sdr_high_range = NULL, quiet = FALSE)
 }
 \arguments{
 \item{mat}{The input matrix or a list of matrices.}

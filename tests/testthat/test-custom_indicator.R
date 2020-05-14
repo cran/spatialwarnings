@@ -26,11 +26,11 @@ test_that('Custom indicators work', {
   
   for (dataset in datasets) { 
     # Run a classical workflow and make sure there are no errors
-    maxpatchsize <- function(mat) { 
-      max(patchsizes(mat))
+    testindic <- function(mat) { 
+      mat[1, 1]
     }
     
-    indicator_mp <- create_indicator(maxpatchsize)
+    indicator_mp <- create_indicator(testindic)
     a <- indicator_mp(dataset)
     
     # Test methods for custom indics
@@ -38,14 +38,14 @@ test_that('Custom indicators work', {
     test_methods("Spatial Early-Warning:", length(dataset), a)
     test_methods("Spatial Early-Warning:", 1, a[[1]])
     
-    if (length(dataset) > 1) { 
+    if ( length(dataset) > 1 ) { 
       # Suppress the warnings related to missing values in geom_path
       suppressWarnings( plot(a) )
     }
     
-    indictest(a[[1]], nperm = 9)
+    indictest(a[[1]], nulln = 9)
     
-    b <- indictest(a, nperm = 9)
+    b <- indictest(a, nulln = 9)
     test_methods("Spatial Early-Warning:", length(dataset), b)
     test_methods("Spatial Early-Warning:", 1, b[[1]])
     
@@ -56,11 +56,11 @@ test_that('Custom indicators work', {
     
   }
   
-  # Test that create_indicator and custom_indicator work the same
-  indicator_mp <- create_indicator(maxpatchsize)
+  # Test that create_indicator and compute_indicator work the same
+  indicator_mp <- create_indicator(testindic)
   a <- indicator_mp(dataset)
   expect_true({ 
-    all.equal(a, custom_indicator(dataset, fun = maxpatchsize))
+    all.equal(a, compute_indicator(dataset, fun = testindic))
   })
   
 })
@@ -73,7 +73,7 @@ test_that('Custom indicators handles anonymous functions correctly', {
   )
   expect_true({
     anon_fun_indic <- create_indicator(function(mat) mean(mat), 
-                                       indicname = "testfun")
+                                       taskname = "TestTask")
     TRUE
   })
 })

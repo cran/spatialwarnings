@@ -15,17 +15,17 @@
 #' 
 #' @description Plot early-warning signals based on patch size distributions 
 #' 
-#' @param x An object as produced by \code{\link{spectral_sews}}
+#' @param x An object as produced by \code{\link{patchdistr_sews}}
 #' 
-#' @param along A vector providing values over which the indicator trend 
+#' @param along A vector providing values along which the indicator trends 
 #'   will be plotted. If \code{NULL} then the values are plotted sequentially 
 #'   in their original order. 
 #' 
-#' @param ... Further arguments passed to methods
+#' @param ... Ignored 
 #' 
 #' @details 
 #'   
-#'   The \code{plot} function will produce a complex figure summarizing the change 
+#'   The \code{plot} function will produce a figure summarizing the changes
 #'   in patch size distributions along a set of values. The figure has two 
 #'   panels: 
 #'   \itemize{ 
@@ -38,12 +38,12 @@
 #'      \item the bottom panel displays the power-law range
 #'   }
 #'  
-#'  The \code{plot_spectrum} function displays each distribution in an 
+#'  The \code{plot_distr} function displays each distribution in an 
 #'    individual facet, with an overlay of the best distribution fit and a blue 
 #'    bar showing the power-law range. This mode of representation can be 
-#'    cumbersome when working with a high number of matrices but displays the 
-#'    full shape of the distributions. 
-#'  
+#'    cumbersome when working with a high number of matrices but displays in 
+#'    full the shape of the distributions. 
+#' 
 #' @seealso \code{\link{patchdistr_sews}}
 #' 
 #' @examples
@@ -60,7 +60,7 @@
 #' # Display individual distributions
 #' plot_distr(psd_indic, along = forestgap.pars[ ,"d"])
 #' }
-#' 
+#'
 #'@method plot patchdistr_sews
 #'@export
 plot.patchdistr_sews <- function(x, along = NULL, ...) { 
@@ -75,7 +75,8 @@ plot.patchdistr_sews <- function(x, along = NULL, ...) {
 #   have a plot of distributions, use plot_distr
 # 
 #'@method plot patchdistr_sews_list
-plot.patchdistr_sews_list <- function(x, along = NULL) { 
+#'@export
+plot.patchdistr_sews_list <- function(x, along = NULL, ...) { 
   
   if ( !is.null(along) && (length(along) != length(x)) ) { 
     stop('The along values are unfit for plotting (size mismatch)')
@@ -86,10 +87,16 @@ plot.patchdistr_sews_list <- function(x, along = NULL) {
   # Subset table for best fits
   obj_table <- obj_table[is.na(obj_table[ ,'best']) | obj_table[ ,'best'], ]
   
+  if ( all(is.na(obj_table[ ,"best"])) && 
+       all(is.na(obj_table[ ,"plrange"])) ) { 
+    warning("There is no non-missing data to plot in the provided object")
+    return( invisible(NULL) )
+  }
+  
   # If along is provided, then add it to the table
   xtitle <- deparse(substitute(along))
   if ( is.null(along) ) { 
-    along <- as.factor(obj_table[ ,'replicate'])
+    along <- as.factor(obj_table[ ,'matrixn'])
     xtitle <- "Matrix number"
   }
   
@@ -97,7 +104,6 @@ plot.patchdistr_sews_list <- function(x, along = NULL) {
   
   # Now we summarise the obj_table
   alltypes <- na.omit(unique(obj_table[ ,"type"]))
-  
   summ <- ddply(obj_table, 'along',
                 function(df) { 
                   type_freqs <- sapply(alltypes, 
@@ -144,14 +150,14 @@ plot.patchdistr_sews_list <- function(x, along = NULL) {
                position = "stack", stat = "identity") + 
       stat_summary(aes_q(x = ~along, y = ~percolation, 
                          linetype = "Perc. (full)", group = 1), 
-                   fun.y = mean, geom = "line") + 
+                   fun = mean, geom = "line") + 
       stat_summary(aes_q(x = ~along, y = ~percolation_empty, 
                          linetype = "Perc. (empty)", group = 1), 
-                   fun.y = mean, geom = "line") + 
+                   fun = mean, geom = "line") + 
       stat_summary(aes_q(x = ~along, y = ~cover, 
                          linetype = "Mean cover", group = 1), 
-                   fun.y = mean, geom = "line") 
-      
+                   fun = mean, geom = "line") 
+  
   } else { 
     plot <- plot + 
       geom_area(aes_q(x = ~along, y = ~type_freq, fill = ~type), 
@@ -179,8 +185,8 @@ plot.patchdistr_sews_list <- function(x, along = NULL) {
 #' 
 # // along arg is already documented in plot() method
 #' 
-#' @param best_only Plot only the best fit the empirical (inverse cumulative) patch-size 
-#'   distribution with an overlay of the estimated fits. 
+#' @param best_only Plot only the best fit the empirical (inverse cumulative) 
+#'   patch-size distribution with an overlay of the estimated fits. 
 #' 
 #' @param plrange Plot the power-law range 
 #'
@@ -211,8 +217,8 @@ plot_distr.patchdistr_sews_single <- function(x,
   
   # Create base plot 
   plot <- ggplot() + 
-    scale_y_log10() +
-    scale_x_log10() + 
+    scale_x_continuous(trans = "log10") +
+    scale_y_continuous(trans = "log10") + 
     xlab('Patch size') + 
     ylab('Frequency (P>=x)') + 
     theme_spwarnings()
@@ -260,16 +266,16 @@ plot_distr.patchdistr_sews_list <- function(x,
   
   # Get plottable data.frames
   values <- predict(x, best_only = best_only)
-  # Modify replicate column if necessary and reorder values
+  # Modify matrixn column if necessary and reorder values
   if ( ! is.null(along) ) { 
-    values[['obs']][ ,'replicate']  <- along[values[["obs"]][ ,'replicate']]
-    values[['pred']][ ,'replicate'] <- along[values[["pred"]][ ,'replicate']]
+    values[['obs']][ ,'matrixn']  <- along[values[["obs"]][ ,'matrixn']]
+    values[['pred']][ ,'matrixn'] <- along[values[["pred"]][ ,'matrixn']]
   }
   
   plot <- ggplot() + 
     scale_y_log10() +
     scale_x_log10() + 
-    facet_wrap( ~ replicate) + 
+    facet_wrap( ~ matrixn) + 
     xlab('Patch size') + 
     ylab('Frequency (P>=x)') + 
     theme_spwarnings()
@@ -277,21 +283,21 @@ plot_distr.patchdistr_sews_list <- function(x,
   if ( plrange ) { 
     # Add plrange to the plot. We need to extract info 
     # from the observed psd so that we can place the segment on the plot. 
-    plrange_dat <- unique( as.data.frame(x)[ ,c("replicate", 'xmin_est')] )
+    plrange_dat <- unique( as.data.frame(x)[ ,c("matrixn", 'xmin_est')] )
     if ( ! is.null(along) ) { 
-      plrange_dat[ ,"replicate"] <- along[plrange_dat[ ,"replicate"]]
+      plrange_dat[ ,"matrixn"] <- along[plrange_dat[ ,"matrixn"]]
     }
     
-    patches_minmax <- ddply(values[['obs']], "replicate", 
+    patches_minmax <- ddply(values[['obs']], "matrixn", 
                           function(df) { 
                             data.frame(xmax = max(df[ ,"patchsize"]))
                           })
     plrange_dat <- join(plrange_dat, patches_minmax, type = "left", 
-                        match = "first", by = "replicate")
+                        match = "first", by = "matrixn")
     
     plot <- plot + 
       geom_segment(aes_q(x = ~xmin_est, y = 1, 
-                          xend = ~xmax,  yend = 1), 
+                         xend = ~xmax,  yend = 1), 
                     data = plrange_dat, 
                     arrow = arrow(ends = "both", type = "open", 
                                   length = unit(0.05, "inches")), 
@@ -363,9 +369,7 @@ plot_distr.patchdistr_sews_list <- function(x,
 #' 
 #' }
 #' 
-#' @seealso \code{\link{patchdistr_sews}}, 
-#'   \code{\link[=patchdistr_sews_plot]{plot}}, 
-#'   \code{\link[=patchdistr_sews_plot]{plot_distr}}, 
+#' @seealso \code{\link{patchdistr_sews}}
 #' 
 #'@export
 predict.patchdistr_sews_single <- function(object, ..., 
@@ -441,9 +445,9 @@ predict.patchdistr_sews_list <- function(object, ...,
   # Add id but handle when psd is empty
   add_id <- function(n, x) { 
     if (nrow(x) > 0) { 
-      x <- data.frame(replicate = n, x) 
+      x <- data.frame(matrixn = n, x) 
     } else {
-      x <- data.frame(replicate = n, patchsize = NA_integer_)
+      x <- data.frame(matrixn = n, patchsize = NA_integer_)
     } 
   }
   
@@ -487,7 +491,7 @@ as.data.frame.patchdistr_sews_list <- function(x, ...) {
   # Format data
   results <- lapply(x, as.data.frame.patchdistr_sews_single)
   results <- Map(function(n, df) { 
-                   data.frame(replicate = n, df) 
+                   data.frame(matrixn = n, df) 
                  }, seq.int(length(results)), results)
   
   # Bind it altogether and return df 
@@ -522,11 +526,24 @@ prepare_summary_table <- function(x, ...) {
             'type', 'plrange')
   pretty_names <- c('N(uniq.)', 'Cover', 'Percl.Full', 'Percl.Empt', 'Type', 'PLR')
   
-  # If there is a replicate column (for when several matrices were 
+  # If there is a matrixn column (for when several matrices were 
   #   used at once), then add it to these columns
-  if ( "replicate" %in% names(dat) ) { 
-    cols <- c("replicate", cols)
+  if ( "matrixn" %in% names(dat) ) { 
+    cols <- c("matrixn", cols)
     pretty_names <- c('Mat. #', pretty_names)
+  }
+  
+  # If there is a pvalue columne, then add it to the output table at the end, 
+  # along with the stars
+  if ( "plrpval" %in% names(dat) ) { 
+    dat[ ,"pvalstars"] <- pval_stars(dat[ ,"plrpval"])
+    dat[ ,'pvalstars'] <- ifelse(is.na(dat[ ,'plrpval']), " ", 
+                                 as.character(dat[ ,'pvalstars']))
+    dat[ ,'plrpval'] <- ifelse(is.na(dat[ ,'plrpval']), " ", 
+                               as.character(dat[ ,'plrpval']))
+    
+    cols <- c(cols, "plrpval", "pvalstars")
+    pretty_names <- c(pretty_names, "P>null (PLR)", "")
   }
   
   # Extract data and rename cols
@@ -540,11 +557,13 @@ prepare_summary_table <- function(x, ...) {
 summary.patchdistr_sews <- function(object, ...) { 
   dat <- prepare_summary_table(object)
   
-  cat('Patch-based Early-Warnings results\n') 
+  cat('Spatial Early-Warning: Patch-based indicators\n') 
   cat('\n')
   print.data.frame(dat, row.names = FALSE, digits = DIGITS)
   cat('\n')
-  cat('Use as.data.frame() to retrieve values in a convenient form\n')
+  cat("The following methods are available: \n")
+  cat(list_methods("simple_sews_list"), "\n")
+  
   invisible(dat)
 }
 
@@ -558,22 +577,16 @@ summary.patchdistr_sews <- function(object, ...) {
 
 #'@export
 print.patchdistr_sews <- function(x, ...) { 
-  cat('Patch-based Early-Warnings results\n') 
-  cat('\n')
-  
-  print.data.frame( as.data.frame(x), row.names = FALSE)
-  
-  cat('\n')
-  cat('Use as.data.frame() to retrieve values in a convenient form\n')
+  summary(x, ...)
 }
 
 
 
 # Helper function 
 # ---------------
-# Get the inverse cumulative distribution of a psd (P(x >= k))
-cumpsd <- function(dat) { 
-  x <- sort(unique(dat))
+# Get the inverse cumulative distribution of a psd (P(x >= k)). x here are the 
+# values at which to evalue the inverse cumulative psd. 
+cumpsd <- function(dat, x = sort(unique(dat))) { 
   N <- length(dat)
   y <- sapply(x, function(k) { sum(dat >= k) / N })
   return( data.frame(patchsize = x, y = y) )

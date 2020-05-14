@@ -75,6 +75,12 @@
 #'   Livina, V.N., et al. (2014). Early Warning Signals of Ecological 
 #'   Transitions: Methods for Spatial Patterns. PLoS ONE, 9, e92097.
 #' 
+#' @seealso \code{\link{rspectrum}}, \code{\link{plot_spectrum}}, 
+#'   \code{\link{raw_sdr}}, \code{\link{extract_spectrum}}
+#' 
+#' @seealso 
+#'   \code{\link{indictest}}, to test the significance of indicator values. 
+#' 
 #' @examples
 #' \dontrun{
 #' 
@@ -95,7 +101,7 @@
 #' # computing using: options(mc.cores = n)
 #' 
 #' # Assess significance
-#' spec_test <- indictest(spec_indic, nperm = 199)
+#' spec_test <- indictest(spec_indic, nulln = 199)
 #' summary(spec_test)
 #' 
 #' # Display the SDR trend, now with a grey ribbon representing 5%-95% 
@@ -121,27 +127,24 @@
 #' }
 #' @export
 spectral_sews <- function(mat, 
-                           sdr_low_range  = NULL, 
-                           sdr_high_range = NULL, 
-                           quiet = FALSE) { 
-  
-  # Check if mat is suitable
-  check_mat(mat)
+                          sdr_low_range  = NULL, 
+                          sdr_high_range = NULL, 
+                          quiet = FALSE) { 
   
   if ( is.null(sdr_low_range) ) { 
     if ( !quiet ) { 
       warning("Choosing the 20% lowest frequencies for spectral density ratio ",
-              "as no range was specified. Use parameter sdr_low_range to choose ", 
-              "a different value.")
+              "as no range was specified. Use parameter sdr_low_range to ", 
+              "choose a different value.")
     }
     sdr_low_range <- c(0, .2)
   }
   
   if ( is.null(sdr_high_range) ) { 
     if ( !quiet ) { 
-      warning("Choosing the 20% highest frequencies for spectral density ratio ",
-              "as no range was specified. Use parameter sdr_high_range to choose ", 
-              "a different value.")
+      warning("Choosing the 20% highest frequencies for spectral density ", 
+              "ratio as no range was specified. Use parameter sdr_high_range ", 
+              "to choose a different value.")
     }
     sdr_high_range <- c(.8, 1)
   }
@@ -151,19 +154,25 @@ spectral_sews <- function(mat,
     results <- lapply(mat, spectral_sews, sdr_low_range, 
                       sdr_high_range, quiet)
     names(results) <- names(mat)
-    class(results) <- c('spectral_sews_list',  'spectral_sews', 
-                        'sews_result_list', 'list')
+    class(results) <- c('spectral_sews_list',  
+                        'spectral_sews', 
+                        'simple_sews_list', 
+                        'simple_sews', 
+                        'sews_result_list')
+    
     return(results)
   }
   
-  orig_input <- mat # Save original data for null models later
+  # Convert object to matrix and check if it is suitable for spatialwarnings
+  mat <- convert_to_matrix(mat)
+  check_mat(mat)
   
   # Now the mat is always a matrix -> process it
   # Check and warn if not square
   if ( nrow(mat) != ncol(mat) ) { 
     if ( !quiet ) { 
-      warning('The matrix is not square: only a squared subset in the left part ', 
-              'will be used.')
+      warning('The matrix is not square: only a squared subset of the left ", 
+              "part will be used.')
     }
     
     mindim <- min(dim(mat))
@@ -182,12 +191,142 @@ spectral_sews <- function(mat,
                                       ranges_absolute[["high"]])
   
   # Return list containing both
-  output <- list(results = list(spectrum = spectrum, sdr = sdr_value), 
-                 orig_data = orig_input, 
-                 call = match.call(), 
+  output <- list(value = c(sdr = sdr_value), 
+                 spectrum = spectrum, 
+                 orig_data = mat, 
                  low_range = ranges_absolute[['low']], 
-                 high_range = ranges_absolute[['high']])
-  class(output) <- c('spectral_sews_single', 'spectral_sews', 
-                     'sews_result_single', 'list')
+                 high_range = ranges_absolute[['high']], 
+                 taskname = "Spectrum-based indicators")
+  class(output) <- c('spectral_sews_single', 
+                     'spectral_sews', 
+                     'simple_sews_single', 
+                     'simple_sews', 
+                     'sews_result_single', 
+                     'list')
+  
   return(output)
+}
+
+# 
+#' @title Spectral Density Ratio (SDR) indicator
+#' 
+#' @description Compute the ratio of low frequencies over high frequencies
+#'   of the r-spectrum. 
+#' 
+#' @param mat A matrix with continuous values, or a logical matrix 
+#'   (TRUE/FALSE). 
+#' 
+#' @param sdr_low_range The range of values (in proportion) to 
+#'   use for the computation of the spectral density ratio.
+#'   For example, for the lowest 20\% (default value), set \code{sdr_low_range}
+#'   to \code{c(0, .2)}.
+#'  
+#' @param sdr_high_range The range of values (in proportion) to 
+#'   use for the computation of the spectral density ratio. For example, for 
+#'   the highest 20\% (default value), set \code{sdr_high_range} to 
+#'   \code{c(.8, 1)}. 
+#' 
+#' @return The SDR values computed on the matrix
+#' 
+#' @details 
+#' 
+#' SDR measures the increase in long-range correlations before a critical point. 
+#'   It is the ratio of the average low frequency value over high frequency 
+#'   values. In this implementation, an increase in SDR implies a "reddening" 
+#'   of the \link[=rspectrum]{r-spectrum}. See also \code{\link{spectral_sews}} for 
+#'   a more complete description. 
+#' 
+#' Low and high frequencies are averaged in order to compute the SDR. The 
+#'   parameters \code{sdr_low_range} and \code{sdr_high_range} control which 
+#'   frequencies are selected for averaging. For example 
+#'   \code{sdr_low_range = c(0, .2)} (default) uses the lower 20% to compute 
+#'   the average of low frequencies. \code{sdr_high_range = c(.8, 1)} uses the 
+#'   higher 20% for the average of high frequencies. 
+#' 
+#' @seealso \code{\link{indictest}}, 
+#'   \code{\link{rspectrum}}, \code{\link{plot_spectrum}}, 
+#'   \code{\link{spectral_sews}}, \code{\link{extract_spectrum}}
+#' 
+#' @references 
+#' 
+#' Carpenter, S.R. & Brock, W.A. (2010). Early warnings of regime shifts in 
+#'   spatial dynamics using the discrete Fourier transform. Ecosphere
+#' 
+#' @examples 
+#' 
+#' \dontrun{ 
+#' data(serengeti)
+#' serengeti.sdr <- raw_sdr(serengeti[[1]], 
+#'                          sdr_low_range = c(0, 0.2), 
+#'                          sdr_high_range = c(0.8, 1))
+#' compute_indicator(serengeti, raw_sdr)
+#' }
+#' 
+#' @export
+raw_sdr <- function(mat, 
+                    sdr_low_range  = NULL, 
+                    sdr_high_range = NULL) { 
+  
+  check_mat(mat) # checks if sensible
+  
+  if ( is.null(sdr_low_range) ) { 
+    warning("Choosing the 20% lowest frequencies for spectral density ratio ",
+            "as none was specified. Use parameter sdr_low_range to choose ", 
+            "a different value.")
+    sdr_low_range <- c(0, .2)
+  }
+  
+  if ( is.null(sdr_high_range) ) { 
+    warning("Choosing the 20% highest frequencies for spectral density ratio ",
+            "as none was specified. Use parameter sdr_high_range to choose ", 
+            "a different value.")
+    sdr_high_range <- c(.8, 1)
+  }
+  
+  ranges_absolute <- convert_ranges_to_absolute(mat, sdr_low_range, 
+                                                sdr_high_range)
+  
+  c(sdr = indicator_sdr_core(mat, 
+                             ranges_absolute[["low"]],
+                             ranges_absolute[["high"]]))
+}
+
+indicator_sdr_core <- function(mat, low_range, high_range) { 
+  
+  # Compute r-spectrum
+  spectrum <- rspectrum(mat)
+  
+  # Compute ratio
+  return( indicator_sdr_do_ratio(spectrum, low_range, high_range) )
+}
+
+indicator_sdr_do_ratio <- function(spectrum, low_range, high_range) { 
+  
+  # Compute subsets
+  low_subset  <- with(spectrum, dist <= max(low_range)  & 
+                                  dist >= min(low_range))
+  high_subset <- with(spectrum, dist <= max(high_range) & 
+                                  dist >= min(high_range))
+  
+  # If the number of values to estimate means is very low, then warn. 
+  if ( sum(low_subset) < 3 || sum(high_subset) < 3 ) { 
+    warning('The number of values used to compute the SDR ratio is very low ', 
+            'it may be unreliable')
+  }
+  
+  # Return ratio of means
+  with(spectrum, mean(rspec[low_subset]) / mean(rspec[high_subset])) 
+}
+
+# Convert ranges from proportional values to absolute distance values
+convert_ranges_to_absolute <- function(mat, 
+                                       sdr_low_range  = NULL, 
+                                       sdr_high_range = NULL) { 
+    
+  maxdist <- 1 + floor(min(dim(mat)) / 2)
+  low_range_absolute  <- sdr_low_range * maxdist
+  high_range_absolute <- sdr_high_range * maxdist
+  
+  return( list(low = low_range_absolute, 
+               high = high_range_absolute) )
 }

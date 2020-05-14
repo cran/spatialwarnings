@@ -4,8 +4,15 @@
 \alias{indicator_psdtype}
 \title{Change in patch-size distributions types}
 \usage{
-indicator_psdtype(x, xmin = 1, merge = FALSE, fit_lnorm = FALSE,
-  xmin_bounds = NULL, best_by = "AIC", wrap = FALSE)
+indicator_psdtype(
+  x,
+  xmin = 1,
+  merge = FALSE,
+  fit_lnorm = FALSE,
+  xmin_bounds = NULL,
+  best_by = "AIC",
+  wrap = FALSE
+)
 }
 \arguments{
 \item{x}{A logical (TRUE/FALSE values) matrix or a list of these.}
@@ -80,7 +87,7 @@ select the best model using AIC, BIC (default) or AICc.
 data(forestgap)
 
 # One logical matrix only
-indicator_psdtype(forestgap[1])
+indicator_psdtype(forestgap[[1]])
 
 # A list of these matrices
 \dontrun{ 

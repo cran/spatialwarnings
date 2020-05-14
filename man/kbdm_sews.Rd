@@ -42,10 +42,10 @@ be a useful indicator to anticipate transitions in model ecological
 kbdm_result <- kbdm_sews(serengeti, subsize = 3)
 plot(kbdm_result, along = serengeti.rain)
 
-kbdm_test <- indictest(kbdm_result, nperm = 99)
+kbdm_test <- indictest(kbdm_result, nulln = 49)
 plot(kbdm_test, along = serengeti.rain)
 
-# Plot deviation to a random matrix
+# Plot deviation to null expectation
 plot(kbdm_test, along = serengeti.rain, what = "z_score") 
 
 }
@@ -58,5 +58,6 @@ Dakos, V., and F. Soler-Toscano. 2017. Measuring complexity to infer
   Complexity 32:144-155.
 }
 \seealso{
-\code{\link{raw_kbdm}}, \code{\link[acss]{acss}}
+\code{\link{raw_kbdm}}, \code{\link[acss]{acss}}, 
+  \code{\link{indictest}}, to test the significance of indicator values.
 }

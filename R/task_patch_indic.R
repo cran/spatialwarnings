@@ -1,14 +1,14 @@
 #
 #' @title Early-warning signals based on patch size distributions
 #' 
-#' @description Compute early-warnings based on patch size distributions 
-#'   and review/plot the results
+#' @description Compute early-warning signals based on patch size distributions 
 #' 
-#' @param x A logical matrix (TRUE/FALSE values) or a list of these
+#' @param mat A logical matrix (TRUE/FALSE values) or a list of these
 #' 
 #' @param merge The default behavior is to produce indicators values for each 
 #'   matrix. If this parameter is set to TRUE then the patch size distributions 
-#'   are pooled together for fitting. 
+#'   are pooled together before fitting, yielding only one final indicator 
+#'   value for the set of matrices. 
 #' 
 #' @param fit_lnorm When patch size distributions are compared, should we 
 #'   consider lognormal type ? (see details)
@@ -21,7 +21,8 @@
 #'   the best power-law fit, then use this estimated value to fit all 
 #'   distributions. 
 #' 
-#' @param xmin_bounds Bounds when estimating the xmin for power-law distributions
+#' @param xmin_bounds Bounds when estimating the xmin for power-law
+#'   distributions
 #' 
 #' @param wrap Determines whether patches are considered to wrap around the 
 #'  matrix when reaching the side 
@@ -64,8 +65,9 @@
 #' and optionally, a log-normal. Each distribution parameter is estimated 
 #' using maximum-likelihood, with a minimum patch size (xmin) fixed to one. 
 #' The best distribution is selected based on BIC by default. In raw results, 
-#' \code{expo} refers to the power-law exponent \eqn{\lambda} in the previous 
-#' equations and \code{rate} referes to the exponential decay rate \eqn{\alpha}. 
+#' \code{expo} refers to the power-law exponent (\eqn{\lambda} in the previous 
+#' equations) and \code{rate} referes to the exponential decay rate
+#' \eqn{\alpha}. 
 #' 
 #' To compute the Power-law range (PLR), power-laws are fitted with a variable 
 #' minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
@@ -76,16 +78,19 @@
 #' 
 #' Results can be displayed using the text-based \code{summary} and \code{print}, 
 #' but graphical options are also available to plot the trends (\code{plot}) and 
-#' the fitted distributions (\code{plot_distr}). Plotting functions are 
+#' the fitted distributions ( \code{\link{plot_distr}}). Plotting functions are 
 #' documented in a \link[=patchdistr_sews_plot]{separate page}. Observed and 
 #' fitted distributions can be produced using the \code{predict} function, 
 #' as documented in \link[=patchdistr_sews_predict]{this page}. 
 #' 
-#' @seealso \code{\link{indicator_psdtype}}, \code{\link{patchsizes}}, 
-#'   \code{\link[=patchdistr_sews_plot]{plot}}, 
-#'   \code{\link[=patchdistr_sews_plot]{plot_distr}}, 
-#'   \code{\link[=patchdistr_sews_predict]{predict}}
+#' @seealso \code{\link{patchsizes}}, \code{\link{plot_distr}}, 
+#'   \code{\link[=predict.patchdistr_sews_single]{predict}}, 
+#'   \code{\link[=plot.patchdistr_sews]{plot}}, 
+#'   
 #' 
+#' @seealso 
+#'   \code{\link{indictest}}, to test the significance of indicator values. 
+#'     
 #' @references 
 #' 
 #' Kefi, S., Rietkerk, M., Alados, C. L., Pueyo, Y., Papanastasis, 
@@ -97,6 +102,10 @@
 #'   (2011). Robust scaling in ecosystems and the meltdown of patch size 
 #'   distributions before extinction: Patch size distributions towards 
 #'   extinction. Ecology Letters, 14, 29-35.
+#' 
+#' Berdugo, M, Sonia Kefi, Santiago Soliveres, and Fernando T. Maestre. (2017) 
+#'   Plant Spatial Patterns Identify Alternative Ecosystem Multifunctionality 
+#'   States in Global Drylands. Nature in Ecology and Evolution, no. 1.
 #' 
 #' Clauset, A., Shalizi, C. R., & Newman, M. E. (2009). 
 #'   Power-law distributions in empirical data. SIAM review, 51(4), 661-703.
@@ -123,7 +132,7 @@
 #' 
 #' }
 #' @export
-patchdistr_sews <- function(x, 
+patchdistr_sews <- function(mat, 
                             merge = FALSE,
                             fit_lnorm = FALSE,
                             best_by = "BIC", 
@@ -131,19 +140,27 @@ patchdistr_sews <- function(x,
                             xmin_bounds = NULL, 
                             wrap = FALSE) {
   
-  check_mat(x) # Check input matrix
-  
   # If input is a list -> apply on each element
-  if ( !merge & is.list(x)) { 
-    results <- parallel::mclapply(x, patchdistr_sews, merge, fit_lnorm, 
-                                   best_by, xmin, xmin_bounds, wrap)
+  if ( !merge & is.list(mat)) { 
+    results <- future.apply::future_lapply(mat, patchdistr_sews, merge,
+                                           fit_lnorm, best_by, xmin,
+                                           xmin_bounds, wrap)
     class(results) <- c('patchdistr_sews_list', 'patchdistr_sews', 
                         'sews_result_list', 'list')
     return(results)
   } 
   
+  # Convert object to matrix form (or list of matrices) and check if it is
+  # suitable for spatialwarnings
+  mat <- convert_to_matrix(mat)
+  if ( is.list(mat) ) { 
+    lapply(mat, check_mat)
+  } else { 
+    check_mat(mat)
+  }
+  
   # Get patch size distribution
-  psd <- patchsizes(x, merge = merge, wrap = wrap)
+  psd <- patchsizes(mat, merge = merge, wrap = wrap)
   
   # Set bounds to search for xmin
   if ( length(psd) > 0 && is.null(xmin_bounds) ) { 
@@ -158,21 +175,21 @@ patchdistr_sews <- function(x,
   }
   
   # Compute percolation 
-  if ( is.list(x) ) { 
-    percol <- lapply(x, percolation)
+  if ( is.list(mat) ) { 
+    percol <- lapply(mat, percolation)
     percol <- mean(unlist(percol))
-    percol_empty <- lapply(x, function(x) percolation(!x))
+    percol_empty <- lapply(mat, function(mat) percolation(!mat))
     percol_empty <- mean(unlist(percol_empty))
   } else { 
-    percol <- percolation(x)
-    percol_empty <- percolation(!x)
+    percol <- percolation(mat)
+    percol_empty <- percolation(!mat)
   } 
   
   # Compute the mean cover 
-  if ( is.list(x) ) { 
-    meancover <- mean(laply(x, mean))
+  if ( is.list(mat) ) { 
+    meancover <- mean(laply(mat, mean))
   } else { 
-    meancover <- mean(x)
+    meancover <- mean(mat)
   }
   
   # Return object 
@@ -183,7 +200,8 @@ patchdistr_sews <- function(x,
                  cover = meancover,
                  plrange = plr_est, 
                  npatches = length(psd),
-                 unique_patches = length(unique(psd)))
+                 unique_patches = length(unique(psd)), 
+                 orig_data = mat)
   class(result) <- c('patchdistr_sews_single', 'patchdistr_sews', 
                      'sews_result_single', 'list')
   

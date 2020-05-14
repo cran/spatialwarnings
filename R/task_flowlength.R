@@ -65,10 +65,12 @@
 #' @param cell_size The horizontal size of a cell in the matrix (as viewed 
 #'   from above). 
 #' 
-#' @param method The method to use to compute the flow length (for now only 
-#'   the method "uniform", using a single slope approximation, is implemented)
-#' 
 #' @return The flow length numerical value. 
+#' 
+#' 
+#' @seealso 
+#'   \code{\link{raw_flowlength_uniform}}, 
+#'   \code{\link{indictest}} to test the significance of indicator values. 
 #' 
 #' @examples 
 #' 
@@ -78,39 +80,19 @@
 #' # Compute the Z-score (standardized deviation to null distribution) and plot 
 #' #   its variations along the gradient. This Z-score is suggested by 
 #' #   Rodriguez et al. (2017) as an indicator of degradation. 
-#' fl_test <- indictest(fl_result, nperm = 19)
+#' fl_test <- indictest(fl_result, nulln = 19)
 #' plot(fl_test, what = "z_score")
 #' }
 #' 
 #'@export
-flowlength_sews <- function(mat, 
-                            slope = 20, 
-                            cell_size = 1, 
-                            method = "uniform topography") { 
+flowlength_sews <- function(mat,        # Input matrix
+                            slope = 20, # Slope (in degrees)
+                            cell_size = 1) { # Cell size
   
-  # This is a formatted function to compute the flow length
-  flfun <- function(mat, slope, cell_size) { 
-    result <- list(value     = raw_flowlength_uniform(mat, slope, cell_size), 
-                   orig_data = mat, 
-                   fun.args  = list(slope, cell_size), 
-                   indicf    = raw_flowlength_uniform)
-    
-    class(result) <- c('flowlength_sews', 'simple_sews_single', 'list')
-    attr(result, "indicname") <- paste0("Flow length (", method, ")")
-    return(result)
-  }
-  
-  if ( is.list(mat) ) { 
-    result <- parallel::mclapply(mat, flfun, slope, cell_size)
-    names(result) <- names(mat)
-    class(result) <- c('flowlength_sews', 'simple_sews_list', 'list')
-    attr(result, "indicname") <- paste0("Flow length (", method, ")")
-  } else { 
-    result <- flfun(mat, slope, cell_size)
-  }
-  
-  return(result)
-  
+  compute_indicator(mat, raw_flowlength_uniform, 
+                    slope = slope, 
+                    cell_size = cell_size, 
+                    taskname = paste0("Flow length (uniform topography)"))
 }
 
 #
@@ -146,6 +128,8 @@ flowlength_sews <- function(mat,
 #' @return The flow length numerical value. 
 #' 
 #' @seealso \code{\link{flowlength_sews}}
+#' @seealso 
+#'   \code{\link{indictest}}, to test the significance of indicator values. 
 #' 
 #' @examples 
 #' 
@@ -156,8 +140,8 @@ flowlength_sews <- function(mat,
 #' 
 #'@export
 raw_flowlength_uniform <- function(mat,        # Input matrix
-                                  slope,      # Slope (in degrees)
-                                  cell_size) { # Cell size
+                                   slope, # Slope (in degrees)
+                                   cell_size) { # Cell size
   
   if ( is.vector(mat) ) { 
     mat <- matrix(mat, ncol = 1, nrow = length(mat))
@@ -184,5 +168,5 @@ raw_flowlength_uniform <- function(mat,        # Input matrix
   
   fl <- flmean * p_slope
   
-  return(fl)
+  return(c(fl_uniform = fl))
 }

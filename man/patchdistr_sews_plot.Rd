@@ -11,16 +11,16 @@
 plot_distr(x, along = NULL, best_only = TRUE, plrange = TRUE)
 }
 \arguments{
-\item{x}{An object as produced by \code{\link{spectral_sews}}}
+\item{x}{An object as produced by \code{\link{patchdistr_sews}}}
 
-\item{along}{A vector providing values over which the indicator trend 
+\item{along}{A vector providing values along which the indicator trends 
 will be plotted. If \code{NULL} then the values are plotted sequentially 
 in their original order.}
 
-\item{...}{Further arguments passed to methods}
+\item{...}{Ignored}
 
-\item{best_only}{Plot only the best fit the empirical (inverse cumulative) patch-size 
-distribution with an overlay of the estimated fits.}
+\item{best_only}{Plot only the best fit the empirical (inverse cumulative) 
+patch-size distribution with an overlay of the estimated fits.}
 
 \item{plrange}{Plot the power-law range}
 }
@@ -28,7 +28,7 @@ distribution with an overlay of the estimated fits.}
 Plot early-warning signals based on patch size distributions
 }
 \details{
-The \code{plot} function will produce a complex figure summarizing the change 
+The \code{plot} function will produce a figure summarizing the changes
   in patch size distributions along a set of values. The figure has two 
   panels: 
   \itemize{ 
@@ -41,11 +41,11 @@ The \code{plot} function will produce a complex figure summarizing the change
      \item the bottom panel displays the power-law range
   }
  
- The \code{plot_spectrum} function displays each distribution in an 
+ The \code{plot_distr} function displays each distribution in an 
    individual facet, with an overlay of the best distribution fit and a blue 
    bar showing the power-law range. This mode of representation can be 
-   cumbersome when working with a high number of matrices but displays the 
-   full shape of the distributions.
+   cumbersome when working with a high number of matrices but displays in 
+   full the shape of the distributions.
 }
 \examples{
 

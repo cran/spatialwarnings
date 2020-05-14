@@ -4,15 +4,23 @@
 \alias{patchdistr_sews}
 \title{Early-warning signals based on patch size distributions}
 \usage{
-patchdistr_sews(x, merge = FALSE, fit_lnorm = FALSE, best_by = "BIC",
-  xmin = 1, xmin_bounds = NULL, wrap = FALSE)
+patchdistr_sews(
+  mat,
+  merge = FALSE,
+  fit_lnorm = FALSE,
+  best_by = "BIC",
+  xmin = 1,
+  xmin_bounds = NULL,
+  wrap = FALSE
+)
 }
 \arguments{
-\item{x}{A logical matrix (TRUE/FALSE values) or a list of these}
+\item{mat}{A logical matrix (TRUE/FALSE values) or a list of these}
 
 \item{merge}{The default behavior is to produce indicators values for each 
 matrix. If this parameter is set to TRUE then the patch size distributions 
-are pooled together for fitting.}
+are pooled together before fitting, yielding only one final indicator 
+value for the set of matrices.}
 
 \item{fit_lnorm}{When patch size distributions are compared, should we 
 consider lognormal type ? (see details)}
@@ -25,7 +33,8 @@ the special value "estimate" to compute first the xmin that produces
 the best power-law fit, then use this estimated value to fit all 
 distributions.}
 
-\item{xmin_bounds}{Bounds when estimating the xmin for power-law distributions}
+\item{xmin_bounds}{Bounds when estimating the xmin for power-law
+distributions}
 
 \item{wrap}{Determines whether patches are considered to wrap around the 
 matrix when reaching the side}
@@ -39,8 +48,7 @@ A list object of class 'psdfit' containing among other things
   `merge` was TRUE, then the average percolation value is returned)
 }
 \description{
-Compute early-warnings based on patch size distributions 
-  and review/plot the results
+Compute early-warning signals based on patch size distributions
 }
 \details{
 Patterned ecosystems can exhibit a change in their spatial structure as they 
@@ -72,8 +80,9 @@ candidates: a power-law \eqn{x^\lambda}, an exponential
 and optionally, a log-normal. Each distribution parameter is estimated 
 using maximum-likelihood, with a minimum patch size (xmin) fixed to one. 
 The best distribution is selected based on BIC by default. In raw results, 
-\code{expo} refers to the power-law exponent \eqn{\lambda} in the previous 
-equations and \code{rate} referes to the exponential decay rate \eqn{\alpha}. 
+\code{expo} refers to the power-law exponent (\eqn{\lambda} in the previous 
+equations) and \code{rate} referes to the exponential decay rate
+\eqn{\alpha}. 
 
 To compute the Power-law range (PLR), power-laws are fitted with a variable 
 minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
@@ -84,7 +93,7 @@ using this best-fitting xmin:
 
 Results can be displayed using the text-based \code{summary} and \code{print}, 
 but graphical options are also available to plot the trends (\code{plot}) and 
-the fitted distributions (\code{plot_distr}). Plotting functions are 
+the fitted distributions ( \code{\link{plot_distr}}). Plotting functions are 
 documented in a \link[=patchdistr_sews_plot]{separate page}. Observed and 
 fitted distributions can be produced using the \code{predict} function, 
 as documented in \link[=patchdistr_sews_predict]{this page}.
@@ -122,12 +131,17 @@ Kefi, S., Rietkerk, M., Roy, M., Franc, A., de Ruiter, P.C. & Pascual, M.
   distributions before extinction: Patch size distributions towards 
   extinction. Ecology Letters, 14, 29-35.
 
+Berdugo, M, Sonia Kefi, Santiago Soliveres, and Fernando T. Maestre. (2017) 
+  Plant Spatial Patterns Identify Alternative Ecosystem Multifunctionality 
+  States in Global Drylands. Nature in Ecology and Evolution, no. 1.
+
 Clauset, A., Shalizi, C. R., & Newman, M. E. (2009). 
   Power-law distributions in empirical data. SIAM review, 51(4), 661-703.
 }
 \seealso{
-\code{\link{indicator_psdtype}}, \code{\link{patchsizes}}, 
-  \code{\link[=patchdistr_sews_plot]{plot}}, 
-  \code{\link[=patchdistr_sews_plot]{plot_distr}}, 
-  \code{\link[=patchdistr_sews_predict]{predict}}
+\code{\link{patchsizes}}, \code{\link{plot_distr}}, 
+  \code{\link[=predict.patchdistr_sews_single]{predict}}, 
+  \code{\link[=plot.patchdistr_sews]{plot}},
+
+\code{\link{indictest}}, to test the significance of indicator values.
 }

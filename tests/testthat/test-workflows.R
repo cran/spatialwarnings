@@ -9,11 +9,9 @@ data(forestgap)
 data(serengeti)
 
 datasets <- list(forestgap[[3]], 
-                 forestgap[2:4], 
                  serengeti[5:6])
 
 test_methods <- function(teststring, datalength, obj, .test_df = TRUE) { 
-  
   ok_print <- any(grepl(teststring, capture.output(print(obj))))
   expect_true(ok_print)
   
@@ -39,14 +37,16 @@ test_that("The workflow functions work", {
     # Length of data
     datal <- ifelse(is.matrix(dataset), 1, length(dataset))
     
-    # Generic indicators
+    
+    
+    # Simple/generic indicators
     indics <- generic_sews(dataset) 
-    test_methods("Generic Spatial Early-Warnings", 
+    test_methods("Generic indicators", 
                  datal*4, indics) # l(dataset) * 4 indics
     # test_methods("Generic Spatial Early-Warnings", 4, indics[[1]])
     
-    indics.test <- indictest(indics, nperm = 9)
-    test_methods("Generic Spatial Early-Warnings", 
+    indics.test <- indictest(indics, nulln = 3)
+    test_methods("Generic indicators", 
                   datal*4, indics.test)
     
     if ( datal > 1 ) { # multiple values
@@ -54,19 +54,23 @@ test_that("The workflow functions work", {
       suppressWarnings( print( plot(indics) ) )
     }
     
-    
+    # Warn when matrix is logical but no cg will be performed
+    expect_warning({ 
+      generic_sews(forestgap, subsize = 1)
+    })
+
     
     
     # Spectral indicators
     indics <- spectral_sews(dataset, 
                             sdr_low_range  = c(0,  0.2), 
                             sdr_high_range = c(.8, 1)) 
-    test_methods("Spectral Spatial Early-Warnings", 
+    test_methods("Spectrum-based indicators", 
                  length(dataset), indics, .test_df = FALSE)
     expect_warning({ spectral_sews(dataset) }) # give a warning when no args are passed
     
-    indics.test <- indictest(indics, nperm = 9)
-    test_methods("Spectral Spatial Early-Warnings", 
+    indics.test <- indictest(indics, nulln = 3)
+    test_methods("Spectrum-based indicators", 
                   datal, indics.test, .test_df = FALSE)
     
     if ( datal > 1 ) { # multiple values
@@ -79,12 +83,18 @@ test_that("The workflow functions work", {
     
     
     
-    # PSD-based indicators
+    # PSD-based indicators. Suppress warnings that can be produced by optim() 
+    # here. 
     indics <- suppressWarnings( patchdistr_sews(dataset, fit_lnorm = TRUE) )
-    test_methods("Patch-based Early-Warnings results", 
+    test_methods("Patch-based indicators", 
                  datal*4, indics) # l(dataset) * 4 psd types fitted
     # test_methods("Patch-based Early-Warnings results", 
     #              datal*4, indics[[1]])
+    # Here, indictest may produce warnings on the testing datasets, so we 
+    # quiet them down
+    indics.test <- suppressWarnings( indictest(indics, nulln = 3) )
+    test_methods("Patch-based indicators", 
+                  datal*4, indics.test, .test_df = FALSE)
     
     # Test prediction of PSDs
     indics.pred <- predict(indics)
@@ -93,32 +103,16 @@ test_that("The workflow functions work", {
       suppressWarnings( print( plot(indics) ) )
     }
     suppressWarnings( print( plot_distr(indics) ) )
+    suppressWarnings( print( plot_distr(indics.test) ) )
     
-    
-    
-    
-    # Flowlength indicator
-    indics <- flowlength_sews(dataset)
-    test_methods("Spatial Early-Warning: Flow length", 
-                 length(dataset), indics, .test_df = FALSE)
-    if ( ! is.matrix(dataset) ) { 
-      suppressWarnings( print( plot(indics) ) )
-    }
-    
-    indics.test <- indictest(indics, nperm = 3)
-    test_methods("Spatial Early-Warning: Flow length", 
-                  datal, indics.test, .test_df = FALSE)
-    
-    
-    
-    # KBDM indicator
-    indics <- suppressWarnings( kbdm_sews(dataset) )
-    test_methods("Spatial Early-Warning: Kbdm Complexity", 
-                 datal, indics) # l(dataset) * 4 psd types fitted
-    
-    if ( ! is.matrix(dataset) ) { 
-      suppressWarnings( print( plot(indics) ) )
-    }
+    # We print a warning when there is no data to display because all fits 
+    # failed. This can happen e.g. when there is a single patch in a matrix
+    a <- matrix(FALSE, ncol = 10, nrow = 10) 
+    a[1,1] <- TRUE
+    a <- list(a, a)
+    expect_warning({ 
+      plot(patchdistr_sews(a))
+    })
     
   }
   

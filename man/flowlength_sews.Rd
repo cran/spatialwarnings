@@ -4,8 +4,7 @@
 \alias{flowlength_sews}
 \title{Flowlength connectivity indicator (uniform topography)}
 \usage{
-flowlength_sews(mat, slope = 20, cell_size = 1,
-  method = "uniform topography")
+flowlength_sews(mat, slope = 20, cell_size = 1)
 }
 \arguments{
 \item{mat}{The input matrix (must be a logical matrix)}
@@ -14,9 +13,6 @@ flowlength_sews(mat, slope = 20, cell_size = 1,
 
 \item{cell_size}{The horizontal size of a cell in the matrix (as viewed 
 from above).}
-
-\item{method}{The method to use to compute the flow length (for now only 
-the method "uniform", using a single slope approximation, is implemented)}
 }
 \value{
 The flow length numerical value.
@@ -58,7 +54,7 @@ fl_result <- flowlength_sews(arizona, slope = 20, cell_size = 1)
 # Compute the Z-score (standardized deviation to null distribution) and plot 
 #   its variations along the gradient. This Z-score is suggested by 
 #   Rodriguez et al. (2017) as an indicator of degradation. 
-fl_test <- indictest(fl_result, nperm = 19)
+fl_test <- indictest(fl_result, nulln = 19)
 plot(fl_test, what = "z_score")
 }
 
@@ -87,4 +83,8 @@ Okin, G.S., Moreno-de las Heras, M., Saco, P.M., Throop, H.L., Vivoni, E.R.,
   Parsons, A.J., Wainwright, J., Peters, D.P.C., 2015. Connectivity in 
   dryland landscapes: shifting concepts of spatial interactions. 
   Front. Ecol. Environ. 13 (1), 20-27.
+}
+\seealso{
+\code{\link{raw_flowlength_uniform}}, 
+  \code{\link{indictest}} to test the significance of indicator values.
 }

@@ -5,8 +5,11 @@
 \alias{percolation}
 \title{Labelling of unique patches and detection of percolation.}
 \usage{
-label(mat, nbmask = matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), ncol = 3),
-  wrap = FALSE)
+label(
+  mat,
+  nbmask = matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), ncol = 3),
+  wrap = FALSE
+)
 
 percolation(mat, nbmask = matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), ncol = 3))
 }
@@ -35,27 +38,28 @@ Label each patch with a number in a binary matrix
   matrix)
 }
 \details{
-The \code{label} function "labels" the patches of a binary (TRUE/FALSE) 
-  matrix. It returns a matrix of similar height and width, with integer 
-  values representing the ID of each unique patch (contiguous cells). 
-  Empty cells are labeled as \code{NA}.
+The \code{label} function "labels" the patches of a binary 
+  (TRUE/FALSE) matrix. It returns a matrix of similar height and width, 
+  with integer values representing the ID of each unique patch (contiguous
+   cells). Empty cells are labelled as \code{NA}.
 }
 \examples{
 
 data(forestgap)
 
-par(mfrow=c(1, 2))
 rmat <- matrix(rnorm(100) > .1, ncol = 10)
-image(rmat)
-image(label(rmat))
+display_matrix(label(rmat))
 
 # With 8-way neighborhood mask and no wrapping around borders
 nbmask8 <- matrix(c(1,1,1,
                     1,0,1,
                     1,1,1), ncol=3)
-image(label(rmat, nbmask8, wrap = FALSE))
+display_matrix(label(rmat, nbmask8, wrap = FALSE))
+
+# On real data: 
+display_matrix(label(forestgap[[5]], nbmask8, wrap = FALSE))
 
 }
 \seealso{
-\code{\link{patchsizes}}
+\code{\link{patchsizes}}, \code{\link{patchdistr_sews}}
 }

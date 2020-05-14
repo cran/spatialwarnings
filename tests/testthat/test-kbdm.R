@@ -1,14 +1,16 @@
 # 
 # Test for the Kolmogorov complexity
 # 
+if ( requireNamespace("acss", quietly = TRUE) ) { 
 
 context('Test that the computations for Kolmogorov complexity are correct')
 
 test_that("Kbdm results are correct", { 
-
-  # We can't reproduce exactly the results because we cannot compute Kbdm using 
-  # 4x4 submatrices in acss::acss. We just compute the test on the scale-free
-  # patterns which do not show as much noise as the irregular/turing patterns. 
+  
+  # We can't reproduce exactly the results because we cannot compute 
+  # Kbdm using 4x4 submatrices in acss::acss. We just compute the test on 
+  # the scale-free patterns which do not show as much noise as the 
+  # irregular/turing patterns. 
   dat <- read.csv("./kbdm_data/scale-free/extracted_data.csv", 
                   header = FALSE)
 
@@ -42,12 +44,15 @@ test_that("Kbdm results are correct", {
 
   # Slope of relationship should be close to zero
   expect_true({
-      abs(1 - coef(linmod)[2]) < .1
-    })
+    abs(1 - coef(linmod)[2]) < .1
+  })
 
   # Both values should have a max that is very close 
   expect_true({ 
     abs(xvals[ref == max(ref)] - xvals[val == max(val)]) < .1
   })
 
+  
 })
+
+}

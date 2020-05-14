@@ -17,27 +17,28 @@
 #'   percolation status as "percolation" (whether a TRUE patch has a width 
 #'   or height equal to the size of the matrix). 
 #' 
-#' @details The \code{label} function "labels" the patches of a binary (TRUE/FALSE) 
-#'   matrix. It returns a matrix of similar height and width, with integer 
-#'   values representing the ID of each unique patch (contiguous cells). 
-#'   Empty cells are labeled as \code{NA}.
+#' @details The \code{label} function "labels" the patches of a binary 
+#'   (TRUE/FALSE) matrix. It returns a matrix of similar height and width, 
+#'   with integer values representing the ID of each unique patch (contiguous
+#'    cells). Empty cells are labelled as \code{NA}.
 #' 
-#' @seealso \code{\link{patchsizes}}
+#' @seealso \code{\link{patchsizes}}, \code{\link{patchdistr_sews}}
 #' 
 #' @examples 
 #' 
 #' data(forestgap)
 #' 
-#' par(mfrow=c(1, 2))
 #' rmat <- matrix(rnorm(100) > .1, ncol = 10)
-#' image(rmat)
-#' image(label(rmat))
+#' display_matrix(label(rmat))
 #' 
 #' # With 8-way neighborhood mask and no wrapping around borders
 #' nbmask8 <- matrix(c(1,1,1,
 #'                     1,0,1,
 #'                     1,1,1), ncol=3)
-#' image(label(rmat, nbmask8, wrap = FALSE))
+#' display_matrix(label(rmat, nbmask8, wrap = FALSE))
+#' 
+#' # On real data: 
+#' display_matrix(label(forestgap[[5]], nbmask8, wrap = FALSE))
 #' 
 #' @export
 label <- function(mat, 
@@ -115,12 +116,12 @@ percolation <- function(mat, nbmask = matrix(c(0,1,0,
 
 #' @title Get patch sizes.
 #' 
-#' @description Get the distribution of patch sizes of a logical matrix
+#' @description Get the distribution of patch sizes from a logical matrix
 #' 
-#' @param mat A logical matrix or a list of these matrices.
+#' @param mat A logical matrix or a list of such matrices.
 #' 
 #' @param merge Controls whether the obtained patch size distributions are to 
-#'   be pooled together if mat is a list of matrices. 
+#'   be pooled together if \code{mat} is a list of matrices. 
 #' 
 #' @param nbmask a square matrix with an odd number of lines and columns that 
 #'   describes which neighbors are to be considered around a cell. Default 
