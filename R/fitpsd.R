@@ -2,7 +2,7 @@
 # This file contains code related to patch size distribution fitting. These 
 #   functions can fit Power-law (pl), Truncated Power-law (tpl), Lognormal 
 #   (lnorm) and Exponential (exp) distributions using maximum likelihood, as 
-#   per Clauset et al. 's recommendations. 
+#   per Clauset et al. 's (2007) recommandations.
 # 
 # In addition, it provides the estimation of xmin using the ks-distance for 
 # power-laws (same, following Clauset et al. 2007)
@@ -59,6 +59,7 @@ optim_safe <- function(f, pars0,
             control = list(maxit = ITERLIM), 
             method = "BFGS", ...)
     }, silent = TRUE)
+#     if (class(optiresult_bfgs) == "try-error") browser()
     # If success, go with BFGS results
     if ( class(optiresult_bfgs) != "try-error" ) { 
       optiresult <- optiresult_bfgs
@@ -172,7 +173,7 @@ dpl <- function(x, expo, xmin = 1, log = FALSE) {
 }
 
 # PL: P(x>=k) 
-ppl <- function(x, expo, xmin = 1) { 
+ippl <- function(x, expo, xmin = 1) { 
   const <- displnorm(expo, xmin)
   
   is_below_xmin <- x < xmin
@@ -191,7 +192,97 @@ pl_ll <- function(dat, expo, xmin) {
   sum( dpl(dat, expo, xmin, log = TRUE) )  
 }
 
-# PL: Fit by MLE
+
+#' @title Distribution-fitting functions 
+#'
+#' @description These functions fit parametric distributions to a set of
+#'   discrete values. 
+#'
+#' @param dat The set of values to which the distribution are fit 
+#'
+#' @param xmin The minimum possible value to consider when fitting the
+#'   distribution
+#'
+#' @return A list containing at list the following components: 
+#'
+#' \itemize{ 
+#'    \item{type: }{The type of distribution fitted (as a character string)}
+#'    \item{method: }{The method used for the fit - here, maximum likelihood,
+#'                  'll'}
+#'    \item{ll: }{The negative log likelihood at the estimated parameter values}
+#'    \item{xmin: }{The value of xmin used for the fit}
+#'    \item{npars: }{The number of parameters of the distribution}
+#'  }
+#' 
+#' Additionnaly, this list may have one or more of the following parameters 
+#'   depending on the type of distribution that has been fitted: 
+#'   \itemize{ 
+#'     \item{plexpo: }{The exponent of the power-law}
+#'     \item{cutoff: }{The rate of truncation, for truncated power law and 
+#'                 exponential fits}
+#'     \item{meanlog: }{The mean of the lognormal distribution}
+#'     \item{sdlog: }{The s.d. of the lognormal distribution}
+#'   }
+#' 
+#' @details These functions will fit distributions to a set of values using 
+#'   maximum-likelihood estimation. In the context of the 'spatialwarnings' 
+#'   package, they are most-often used to fit parametric distributions on patch
+#'   size distributions. As a result, these functions assume that the data 
+#'   contains only integer, strictly positive values. The type of distribution
+#'   depends on the prefix of the function: 'pl' for power-law, 'tpl' for
+#'   truncated power-law, 'lnorm' for lognormal and 'exp' for an exponential
+#'   distribution. 
+#' 
+#' In the context of distribution-fitting, 'xmin' represents the minimum value 
+#'   that a distribution can take. It is often used to represent the minimum 
+#'   scale at which a power-law model is appropriate (Clauset et al. 2009), and 
+#'   can be estimated on an empirical distribution using
+#'   \code{\link{xmin_estim}}. Again, please note that the fitting procedure 
+#'   assumes here that xmin is equal or grater than one.
+#' 
+#' Please note that a best effort is made to have the fit converge, but 
+#'   it may sometimes fail when the parameters are far from their usual 
+#'   range. It is good practice to make sure the fits are sensible when 
+#'   convergence warnings are reported.
+#' 
+#' For reference, the shape of the distributions is as follow: 
+#' 
+#' \itemize{
+#'   \item{power-law }{\eqn{x^{-a}}{x^(-a)} where a is the power-law exponent}
+#'   \item{exponential }{\eqn{exp(-bx)}{exp(-bx)} where b is the truncation rate
+#'           of the exponential } 
+#'   \item{truncated power-law }{\eqn{x^{-a}exp(-bx)}{x^(-a)exp(-bx)} where a
+#'     and b are the exponent of the power law and the rate of truncation}
+#' }
+#' 
+#' The lognormal form follows the \link[=dlnorm]{standard definition}.
+#' 
+#' @seealso \code{\link{patchdistr_sews}}, \code{\link{xmin_estim}}
+#' 
+#' @references
+#' 
+#' Clauset, Aaron, Cosma Rohilla Shalizi, and M. E. J. Newman. 2009. “Power-Law
+#' Distributions in Empirical Data.” SIAM Review 51 (4): 661–703. 
+#' https://doi.org/10.1137/070710111.
+#' 
+#' @examples 
+#' 
+#' # Fit an exponential model to patch size distribution 
+#' exp_fit(patchsizes(forestgap[[8]]))
+#'  
+#' # Use the estimated parameters as an indicator function
+#' \dontrun{
+#' 
+#' get_truncation <- function(mat) { 
+#'    c(exp_cutoff = exp_fit(patchsizes(mat))$cutoff)
+#' }
+#' trunc_indic <- compute_indicator(forestgap, get_truncation)
+#' plot(trunc_indic)
+#' plot(indictest(trunc_indic, nulln = 19))
+#' 
+#' }
+#' 
+#'@export
 pl_fit <- function(dat, xmin = 1) { 
   
   # Cut data to specified range
@@ -215,7 +306,7 @@ pl_fit <- function(dat, xmin = 1) {
   
   result <- list(type = 'pl',
                  method = 'll', 
-                 expo = est[["par"]],
+                 plexpo = est[["par"]],
                  ll = - est[['value']],
                  xmin = xmin,
                  npars = 1)
@@ -232,7 +323,8 @@ pl_fit <- function(dat, xmin = 1) {
 #' 
 #' @param dat A vector of integer values
 #' 
-#' @param bounds A bounds 
+#' @param bounds A vector of two values representing the bounds in which 
+#'   the best xmin is searched
 #' 
 #' @return The estimated xmin as an integer value 
 #' 
@@ -294,16 +386,20 @@ get_ks_dist <- function(xmin, dat) {
     cdf_empirical[dat == val] <- mean(dat >= val)
   }
   
-  # Fit and retrieve cdf
-  fit <- pl_fit(dat, xmin = xmin)
+  # Fit and retrieve cdf. Note: here we suppress the warnings because finding 
+  # xmin requires removing patches below a threshold, which often leads to fit 
+  # being done on pathological cases like few unique patch sizes
+  fit <- suppressWarnings({ 
+    pl_fit(dat, xmin = xmin)
+  })
   
-  if ( is.na(fit[['expo']]) ) { 
+  if ( is.na(fit[['plexpo']]) ) { 
     # Note: a warning was already produced in this case as it means that the 
     # fit failed to converge: we do not produce one here again. 
     return(NaN)
   }
   
-  cdf_fitted <- ppl(dat, fit[["expo"]], fit[["xmin"]])
+  cdf_fitted <- ippl(dat, fit[["plexpo"]], fit[["xmin"]])
 
 #   # debug
 #   plot(data.frame(dat, rbinom(length(dat), 1, .5)), type = 'n')
@@ -344,7 +440,7 @@ ddisexp <- function(dat, rate, xmin = 1, log = FALSE) {
 
 # EXP: P(x>=k)
 # Imported and cleaned up from powerRlaw (def_disexp.R)
-pdisexp <- function(x, rate, xmin) {
+ipdisexp <- function(x, rate, xmin) {
   # p >= k
   p <- pexp(x + .5, rate, lower.tail = FALSE) 
   # p >= 1 
@@ -356,6 +452,8 @@ exp_ll <- function(dat, rate, xmin) {
   sum( ddisexp(dat, rate, xmin, log = TRUE)) 
 }
 
+#'@rdname pl_fit
+#'@export
 exp_fit <- function(dat, xmin = 1) { 
   
   dat <- dat[dat>=xmin]
@@ -373,7 +471,7 @@ exp_fit <- function(dat, xmin = 1) {
   
   result <- list(type = 'exp',
                  method = 'll', 
-                 rate = est[['par']], 
+                 cutoff = est[['par']], 
                  ll = - est[["value"]],
                  npars = 1)
   return(result)
@@ -402,7 +500,7 @@ ddislnorm <- function(x, meanlog, sdlog, xmin, log = FALSE) {
 }
 
 # LNORM: P(X>=k)
-pdislnorm <- function(x, meanlog, sdlog, xmin) { 
+ipdislnorm <- function(x, meanlog, sdlog, xmin) { 
   px_supto_k <- plnorm(x - .5, meanlog, sdlog, lower.tail = FALSE)
   px_supto_xmin <- plnorm(xmin - .5, meanlog, sdlog, lower.tail = FALSE)
   ifelse(x<xmin, NaN, px_supto_k / px_supto_xmin)
@@ -415,6 +513,8 @@ lnorm_ll <- function(x, meanlog, sdlog, xmin) {
 }
 
 # LNORM: fit
+#'@rdname pl_fit
+#'@export
 lnorm_fit <- function(dat, xmin = 1) { 
   
   # Pars[1] holds mean of log-transformed data
@@ -461,7 +561,7 @@ dtpl <- function(x, expo, rate, xmin, log = FALSE) {
 }
 
 # P(x>=k)
-ptpl <- function(x, expo, rate, xmin) { 
+iptpl <- function(x, expo, rate, xmin) { 
   const <- tplnorm(expo, rate, xmin)
   
   # tplsum is vectorized over x
@@ -481,6 +581,8 @@ tpl_ll <- function(x, expo, rate, xmin, approximate = FALSE) {
   return( ll )
 } 
 
+#'@rdname pl_fit
+#'@export
 tpl_fit <- function(dat, xmin = 1) { 
   
   negll <- function(pars) { 
@@ -488,9 +590,9 @@ tpl_fit <- function(dat, xmin = 1) {
   }
   
   # Initialize and find minimum
-  expo0 <- pl_fit(dat, xmin)[['expo']] 
+  expo0 <- pl_fit(dat, xmin)[['plexpo']] 
   
-  # Do a line search over the rate to find a minimum, starting from zero 
+  # Do a line search over the cutoff to find a minimum, starting from zero 
   # up to 100
   is <- seq(0, 100, length = 128)
   lls <- unlist(lapply(is, function(i) { 
@@ -506,8 +608,8 @@ tpl_fit <- function(dat, xmin = 1) {
   
   result <- list(type = 'tpl',
                  method = 'll', 
-                 expo = est[['par']][1], 
-                 rate = est[['par']][2], 
+                 plexpo = est[['par']][1], 
+                 cutoff = est[['par']][2], 
                  ll = - est[["value"]],
                  npars = 2)
   return(result)

@@ -65,8 +65,8 @@
 #' and optionally, a log-normal. Each distribution parameter is estimated 
 #' using maximum-likelihood, with a minimum patch size (xmin) fixed to one. 
 #' The best distribution is selected based on BIC by default. In raw results, 
-#' \code{expo} refers to the power-law exponent (\eqn{\lambda} in the previous 
-#' equations) and \code{rate} referes to the exponential decay rate
+#' \code{plexpo} refers to the power-law exponent (\eqn{\lambda} in the previous 
+#' equations) and \code{cutoff} referes to the exponential decay rate
 #' \eqn{\alpha}. 
 #' 
 #' To compute the Power-law range (PLR), power-laws are fitted with a variable 
@@ -142,11 +142,10 @@ patchdistr_sews <- function(mat,
   
   # If input is a list -> apply on each element
   if ( !merge & is.list(mat)) { 
-    results <- future.apply::future_lapply(mat, patchdistr_sews, merge,
-                                           fit_lnorm, best_by, xmin,
-                                           xmin_bounds, wrap)
-    class(results) <- c('patchdistr_sews_list', 'patchdistr_sews', 
-                        'sews_result_list', 'list')
+    results <- future_lapply_seed(mat, patchdistr_sews, merge,
+                                  fit_lnorm, best_by, xmin,
+                                  xmin_bounds, wrap)
+    class(results) <- c('patchdistr_sews_list', 'sews_result_list')
     return(results)
   } 
   
@@ -202,8 +201,7 @@ patchdistr_sews <- function(mat,
                  npatches = length(psd),
                  unique_patches = length(unique(psd)), 
                  orig_data = mat)
-  class(result) <- c('patchdistr_sews_single', 'patchdistr_sews', 
-                     'sews_result_single', 'list')
+  class(result) <- c('patchdistr_sews_single', 'sews_result_single')
   
   return(result)
 }

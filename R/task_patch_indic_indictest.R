@@ -64,8 +64,7 @@ indictest.patchdistr_sews_single <- function(x,
   class(ans) <- c('patchdistr_sews_test_single', 
                   'patchdistr_sews_single', 
                   'sews_result_single', 
-                  'sews_test', 
-                  'list')
+                  'sews_test')
   return(ans)
 }
 
@@ -77,7 +76,7 @@ indictest.patchdistr_sews_list <- function(x,
                                            ...) { 
   
   # Compute a distribution of null values for SDR
-  results <- future.apply::future_lapply(x, indictest.patchdistr_sews_single, 
+  results <- future_lapply_seed(x, indictest.patchdistr_sews_single, 
                                          nulln, null_method, null_control, ...)
   
   # Transfer names 
@@ -87,7 +86,7 @@ indictest.patchdistr_sews_list <- function(x,
   class(results) <- c('patchdistr_sews_test_list', 
                       'patchdistr_sews_list', 
                       'sews_result_list', 
-                      'sews_test', 'list')
+                      'sews_test')
   
   return(results)
   
@@ -108,12 +107,12 @@ print.patchdistr_sews_test_single <- function(x, ...) {
 
 #'@export
 summary.patchdistr_sews_test_list <- function(object, ...) { 
-  summary.patchdistr_sews(object, ...)
+  summary.patchdistr_sews_list(object, ...)
 }
 
 #'@export
 summary.patchdistr_sews_test_single <- function(object, ...) { 
-  summary.patchdistr_sews(object, ...)
+  summary.patchdistr_sews_single(object, ...)
 }
 
 # Convert each element to a data frame, and a column with the matrixn number
@@ -143,15 +142,19 @@ plot_distr.patchdistr_sews_test_list <- function(x,
   nulldat <- Map(function(n, o) data.frame(matrixn = n, o[['cumpsd_null']]), 
                  seq_along(x), x)
   nulldat <- do.call(rbind, nulldat)
+  
+  # Create the `along` values in the table
+  nulldat[ ,"along"] <- nulldat[ ,'matrixn']
   if ( ! is.null(along) ) { 
-    nulldat[ ,'matrixn'] <- along[nulldat[ ,'matrixn']]
+    nulldat[ ,'along'] <- along[nulldat[ ,'matrixn']]
   }
   
   # NOTE: we add layers this way to the ggplot object, so null values appear 
   # below the observed ones
   gplot$layers <- c(geom_ribbon(aes_q(x = ~patchsize, 
                                       ymin = ~qinf, 
-                                      ymax = ~qsup), 
+                                      ymax = ~qsup, 
+                                      group = ~matrixn), 
                                 data = nulldat, alpha = .2), 
                     gplot$layers)
   

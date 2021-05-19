@@ -9,13 +9,14 @@ raw_flowlength_uniform(mat, slope, cell_size)
 \arguments{
 \item{mat}{The input matrix (must be a logical matrix)}
 
-\item{slope}{The slope of the area documented by the matrix (in degree).}
+\item{slope}{The slope of the area documented by the matrix (in degrees).}
 
 \item{cell_size}{The horizontal size of a cell in the matrix (as viewed 
 from above).}
 }
 \value{
-The flow length numerical value.
+A named vector of length 1 containing the flow length numerical 
+  value
 }
 \description{
 Compute a simple approximation of the flow length assuming a 

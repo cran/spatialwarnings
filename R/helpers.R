@@ -1,13 +1,6 @@
 # 
 # 
 
-# Make an indicator function with coarse_graining 
-with_coarse_graining <- function(indicf, subsize) { 
-  function(mat) { 
-    indicf( coarse_grain(mat, subsize) )
-  }
-}
-
 # Function that transforms a set of values into stars for display
 pval_stars <- function(value, NA_ret = NA) { 
   
@@ -77,10 +70,12 @@ ifNULLthen <- function(a, b) {
 }
 
 list_methods <- function(class, 
-                         exclude = c("print", "display_size_info")) { 
+                         exclude = c("print", "display_size_info", 
+                                     "summary")) { 
   all_methods <- lapply(class, function(class) { 
     tab <- attr(methods(class = class), "info")
-    tab[tab[ ,"from"] == "spatialwarnings", "generic"]
+#     tab[tab[ ,"from"] == "spatialwarnings", "generic"]
+    tab[ ,"generic"]
   })
   all_methods <- sort(unique(unlist(all_methods)))
   
@@ -93,4 +88,10 @@ list_methods <- function(class,
   all_methods <- all_methods[! all_methods %in% exclude]
   
   return(all_methods)
+}
+
+# Wrapper around future_lapply to set future.seed = TRUE so that random number 
+# generation in child processes is correct. 
+future_lapply_seed <- function(...) { 
+  future.apply::future_lapply(..., future.seed = TRUE)
 }

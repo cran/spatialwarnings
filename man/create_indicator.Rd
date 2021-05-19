@@ -2,6 +2,7 @@
 % Please edit documentation in R/simple_indic.R
 \name{create_indicator}
 \alias{create_indicator}
+\alias{custom_indicator}
 \alias{compute_indicator}
 \title{Custom Spatial Early-Warning signals}
 \usage{
@@ -26,21 +27,21 @@ default name is used.}
 }
 \value{
 \code{create_indicator} returns a function that can be used in the same way 
-  than the other \code{*_sews} functions (e.g. \code{generic_sews})
+  than the other \code{*_sews} functions (e.g. \code{generic_sews}). This 
+  function as well as \code{compute_indicator} will return
+  \code{\link[=simple_sews]{simple_sews_*}} objects.
 }
 \description{
 Computation, significance assessment and display of trends 
   of a custom, user-defined indicator.
 }
 \details{
-Spatial Early-warning signals (EWS) are metrics that are based on the 
-  spatial structure of a system and measure the degradation of an ecological 
-  system. The package provides "workflow functions", named \code{*_sews}, 
+\code{spatialwarnings} provides "workflow functions", named \code{*_sews}, 
   that assist the user in computing, displaying and assessing the 
-  significance of indicator values. 
-
-\code{create_indicator} extends the package to any arbitrary function. 
-  It takes a function `fun` and returns another function that can be used 
+  significance of indicator values. The functions \code{create_indicator} and 
+  \code{compute_indicator} provides such workflow for any arbitrary function. 
+  
+It takes a function `fun` and returns another function that can be used 
   as an indicator similar to the \code{*_sews} functions. The 
   results of this function can be assessed for significance using 
   \code{indictest} and trends can be displayed using 
@@ -91,4 +92,7 @@ plot(cv_indic2, along = serengeti.rain)
 \dontrun{ 
 indictest(cv_indic, nulln = 99)
 }
+}
+\seealso{
+\code{\link{simple_sews}}
 }

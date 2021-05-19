@@ -7,14 +7,19 @@ DIGITS <- 2
 # 
 .onAttach <- function(libname, pkgname){
   
-  parallelism_message <- 
-    ifelse(.Platform$OS.type == "unix", 
-           "Use plan(multiprocess) or plan(multicore) to set up parallel processing", 
-           "Use plan(multiprocess) to set up parallel processing")
+  parallelism_message <- "Use plan(multisession) to set up parallel processing"
+  
+  package_ver <- utils::packageDescription("spatialwarnings", 
+                                           fields = "Version")
+  
+  devel_message <- ""
+  if ( grepl("99$", package_ver, perl = TRUE) ) { 
+    devel_message <- " (development version, use at your own risk!)"
+  }
   
   packageStartupMessage({ 
     paste0("This is spatialwarnings ", 
-           utils::packageDescription("spatialwarnings", fields = "Version"), 
+           package_ver, devel_message, 
            "\n", parallelism_message)
     }, appendLF = TRUE)
   

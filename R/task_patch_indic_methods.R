@@ -15,7 +15,8 @@
 #' 
 #' @description Plot early-warning signals based on patch size distributions 
 #' 
-#' @param x An object as produced by \code{\link{patchdistr_sews}}
+#' @param x An object as produced by \code{\link{patchdistr_sews}}, or 
+#'   the result of \code{\link{indictest}} called on such object
 #' 
 #' @param along A vector providing values along which the indicator trends 
 #'   will be plotted. If \code{NULL} then the values are plotted sequentially 
@@ -40,9 +41,12 @@
 #'  
 #'  The \code{plot_distr} function displays each distribution in an 
 #'    individual facet, with an overlay of the best distribution fit and a blue 
-#'    bar showing the power-law range. This mode of representation can be 
-#'    cumbersome when working with a high number of matrices but displays in 
-#'    full the shape of the distributions. 
+#'    bar showing the power-law range. If appropriate, a grey ribbon is used to
+#'    display the expected distribution given the null expectation (i.e. when 
+#'    \code{plot_distr} is called on the results of \code{indictest()}. This 
+#'    function can produce quite crowded graphs, but it displays in full the
+#'    shape of the distributions, and can be useful e.g. to assess the quality 
+#'    of the fits. 
 #' 
 #' @seealso \code{\link{patchdistr_sews}}
 #' 
@@ -59,6 +63,11 @@
 #' 
 #' # Display individual distributions
 #' plot_distr(psd_indic, along = forestgap.pars[ ,"d"])
+#' 
+#' # We can display the distributions along with the null expectation after 
+#' # indictest() is run
+#' psd_test <- indictest(psd_indic, nulln = 19)
+#' plot_distr(psd_test, along = forestgap.pars[ ,"d"])
 #' }
 #'
 #'@method plot patchdistr_sews
@@ -266,16 +275,19 @@ plot_distr.patchdistr_sews_list <- function(x,
   
   # Get plottable data.frames
   values <- predict(x, best_only = best_only)
+  
+  values[['obs']][ ,"along"]  <- values[['obs']][ ,'matrixn']
+  values[['pred']][ ,"along"] <- values[['pred']][ ,'matrixn']
   # Modify matrixn column if necessary and reorder values
   if ( ! is.null(along) ) { 
-    values[['obs']][ ,'matrixn']  <- along[values[["obs"]][ ,'matrixn']]
-    values[['pred']][ ,'matrixn'] <- along[values[["pred"]][ ,'matrixn']]
+    values[['obs']][ ,'along']  <- along[values[["obs"]][ ,'matrixn']]
+    values[['pred']][ ,'along'] <- along[values[["pred"]][ ,'matrixn']]
   }
   
   plot <- ggplot() + 
     scale_y_log10() +
     scale_x_log10() + 
-    facet_wrap( ~ matrixn) + 
+    facet_wrap( ~ along ) + 
     xlab('Patch size') + 
     ylab('Frequency (P>=x)') + 
     theme_spwarnings()
@@ -284,8 +296,9 @@ plot_distr.patchdistr_sews_list <- function(x,
     # Add plrange to the plot. We need to extract info 
     # from the observed psd so that we can place the segment on the plot. 
     plrange_dat <- unique( as.data.frame(x)[ ,c("matrixn", 'xmin_est')] )
+    plrange_dat[ ,"along"] <- plrange_dat[ ,"matrixn"]
     if ( ! is.null(along) ) { 
-      plrange_dat[ ,"matrixn"] <- along[plrange_dat[ ,"matrixn"]]
+      plrange_dat[ ,"along"] <- along[plrange_dat[ ,"matrixn"]]
     }
     
     patches_minmax <- ddply(values[['obs']], "matrixn", 
@@ -318,7 +331,8 @@ plot_distr.patchdistr_sews_list <- function(x,
     pred_values <- pred_values[!is.na(pred_values[ ,"type"]), ]
     
     plot <- plot + 
-              geom_line(aes_string(x = "patchsize", y = "y", color = "type"), 
+              geom_line(aes_string(x = "patchsize", y = "y", color = "type", 
+                                   group = "matrixn"), 
                         data = pred_values)
 
   } else { 
@@ -407,17 +421,17 @@ predict.patchdistr_sews_single <- function(object, ...,
   vals_pred <- data.frame()
   for ( type in shptbl[ ,"type"] ) { 
     type_yvals <- switch(type, 
-                         pl  = ppl(newdata, 
-                                   shptbl[type, "expo"], 
+                         pl  = ippl(newdata, 
+                                   shptbl[type, "plexpo"], 
                                    shptbl[type, "xmin_fit"]),
-                         tpl = ptpl(newdata, 
-                                    shptbl[type, "expo"], 
-                                    shptbl[type, "rate"], 
+                         tpl = iptpl(newdata, 
+                                    shptbl[type, "plexpo"], 
+                                    shptbl[type, "cutoff"], 
                                     shptbl[type, 'xmin_fit']),
-                         exp = pdisexp(newdata,  
-                                       shptbl[type, "rate"], 
+                         exp = ipdisexp(newdata,  
+                                       shptbl[type, "cutoff"], 
                                        shptbl[type, "xmin_fit"]),
-                         lnorm = pdislnorm(newdata, 
+                         lnorm = ipdislnorm(newdata, 
                                            shptbl[type, "meanlog"], 
                                            shptbl[type, "sdlog"],  
                                            shptbl[type, "xmin_fit"]))
@@ -543,7 +557,7 @@ prepare_summary_table <- function(x, ...) {
                                as.character(dat[ ,'plrpval']))
     
     cols <- c(cols, "plrpval", "pvalstars")
-    pretty_names <- c(pretty_names, "P>null (PLR)", "")
+    pretty_names <- c(pretty_names, "P<null (PLR)", "")
   }
   
   # Extract data and rename cols
@@ -554,7 +568,11 @@ prepare_summary_table <- function(x, ...) {
 }
 
 #'@export
-summary.patchdistr_sews <- function(object, ...) { 
+summary.patchdistr_sews_single <- function(object, ...) { 
+  summary.patchdistr_sews_list(object, ...)
+}
+#'@export
+summary.patchdistr_sews_list <- function(object, ...) { 
   dat <- prepare_summary_table(object)
   
   cat('Spatial Early-Warning: Patch-based indicators\n') 
@@ -562,7 +580,7 @@ summary.patchdistr_sews <- function(object, ...) {
   print.data.frame(dat, row.names = FALSE, digits = DIGITS)
   cat('\n')
   cat("The following methods are available: \n")
-  cat(list_methods("simple_sews_list"), "\n")
+  cat(list_methods(class(object)), "\n")
   
   invisible(dat)
 }
@@ -576,8 +594,12 @@ summary.patchdistr_sews <- function(object, ...) {
 #   equivalents)
 
 #'@export
-print.patchdistr_sews <- function(x, ...) { 
-  summary(x, ...)
+print.patchdistr_sews_single <- function(x, ...) { 
+  summary.patchdistr_sews_single(x, ...)
+}
+#'@export
+print.patchdistr_sews_list <- function(x, ...) { 
+  summary.patchdistr_sews_list(x, ...)
 }
 
 

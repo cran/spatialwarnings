@@ -78,7 +78,8 @@
 #' @seealso 
 #'   \code{\link{indictest}}, to test the significance of indicator values. 
 #'   Individual indicators: \code{\link{raw_cg_moran}}
-#'     \code{\link{raw_cg_variance}}, \code{\link{raw_cg_skewness}}
+#'     \code{\link{raw_cg_variance}}, \code{\link{raw_cg_skewness}}, 
+#'     \code{\link{simple_sews}}
 #' 
 #' @examples
 #' 
@@ -191,7 +192,7 @@ raw_generic_indic <- function(mat,
 #'   \code{subsize} in each dimension of the matrix. Variance is calculated 
 #'   on the coarse-grained matrix. 
 #' 
-#' @return The variance of the coarse-grained matrix 
+#' @return The variance of the coarse-grained matrix as a named vector 
 #' 
 #' @details
 #' 
@@ -202,7 +203,7 @@ raw_generic_indic <- function(mat,
 #' critical transitions. 
 #' 
 #' Many high resolution spatial data are classified as FALSE (empty) 
-#' or TRUE (occupied by plant). In such cases, spatial variance captures just 
+#' or TRUE (occupied). In such cases, spatial variance captures just 
 #' the variance in data, but not that of spatial structure. 
 #' To resolve the issue, this function employs a method called coarse-graining, 
 #' proposed in Kefi et al (2014), and described in detail in 
@@ -269,7 +270,8 @@ raw_cg_variance <- function(mat, subsize = 5) {
 #' @param subsize logical. Dimension of the submatrix used to coarse-grain the 
 #'   original matrix (set to 1 for no coarse-graining).
 #' 
-#' @return The Moran's I index measuring autocorrelation at lag 1
+#' @return The Moran's I index measuring autocorrelation at lag 1 as a 
+#'   named vector
 #'
 #' @seealso \code{\link{generic_sews}}
 #' 
@@ -307,7 +309,7 @@ raw_cg_moran <- function(mat, subsize = 1) {
 #' @param absolute Should the function return the absolute value or raw value 
 #'   of skewness ?
 #' 
-#' @return The spatial skewness of the matrix
+#' @return The spatial skewness of the matrix as a named vector
 #' 
 #' @details
 #' 

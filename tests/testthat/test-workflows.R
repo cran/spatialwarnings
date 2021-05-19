@@ -114,6 +114,46 @@ test_that("The workflow functions work", {
       plot(patchdistr_sews(a))
     })
     
+    
+    
+    # Variogram-based indicators 
+    indics <- suppressWarnings( variogram_sews(dataset, model = "exp") )
+    test_methods("Variogram-based indicators", 
+                 datal*4, indics) # l(dataset) * 4 metrics reported 
+    # Here, indictest may produce warnings on the testing datasets, so we 
+    # quiet them down
+    indics.test <- suppressWarnings( indictest(indics, nulln = 3) )
+    test_methods("Variogram-based indicators", 
+                 datal*4, indics.test, .test_df = FALSE)
+    
+    # Test prediction of PSDs
+    indics.pred <- predict(indics)
+    
+    if ( ! is.matrix(dataset) ) { 
+      suppressWarnings( print( plot(indics) ) )
+    }
+    suppressWarnings( print( plot_variogram(indics) ) )
+    suppressWarnings( print( plot_variogram(indics.test) ) )
+    
+    
+    # Flowlength-based indicator
+    indics <- suppressWarnings( flowlength_sews(dataset, cell_size = 10) )
+    test_methods("Flow length \\(uniform topography\\)", 
+                 datal, indics) # l(dataset) * 4 metrics reported 
+    indics.test <- indictest(indics, nulln = 3) 
+    test_methods("Flow length \\(uniform topography\\)", 
+                 datal, indics.test, .test_df = FALSE)
+    
+    # Make sure that args are passed through the workflow function 
+    indics_standalone <- compute_indicator(dataset, raw_flowlength_uniform, 
+                                           cell_size = 10, slope = 20)
+    expect_equal(as.data.frame(indics)[ ,"value"], 
+                 as.data.frame(indics_standalone)[ ,"value"])
+    
+    if ( ! is.matrix(dataset) ) { 
+      suppressWarnings( print( plot(indics) ) )
+    }
+    
   }
   
 })

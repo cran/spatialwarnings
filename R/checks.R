@@ -14,7 +14,7 @@ check_mat <- function(mat, NAerror = TRUE) {
   
   # Has NA values
   if ( NAerror && any( is.na(mat) ) ) { 
-    stop('NAs in provided matrix.')
+    warning('NAs in provided matrix.')
   }
   
   # Has only two unique values but it is not a logical matrix
@@ -24,13 +24,6 @@ check_mat <- function(mat, NAerror = TRUE) {
   }
   
   return(TRUE)
-}
-
-warn_if_not_square <- function(mat) { 
-  if ( diff(dim(mat)) != 0 ) { 
-    warning('The matrix is not square: indicator_sdr will only use a square ', 
-            'subset centered around the middle point.')
-  } 
 }
 
 # Check whether some variables are suited to make plots : used in task_generic

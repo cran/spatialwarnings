@@ -40,7 +40,7 @@ indictest.simple_sews_single <- function(x,
   x <- append(x, null_values[["info"]])
   
   class(x) <- c('simple_sews_test_single', 'sews_test', 
-                'sews_result_single', 'list')
+                'sews_result_single')
   
   return(x)
 }
@@ -51,17 +51,17 @@ indictest.simple_sews_list <- function(x,
                                        null_control = NULL, 
                                        ...) { 
   
-  results <- future.apply::future_lapply(x, indictest.simple_sews_single, 
-                                         nulln, null_method, null_control, 
-                                         ...)
+  results <- future_lapply_seed(x, indictest.simple_sews_single, 
+                                nulln, null_method, null_control, 
+                                ...)
   
-  # Add matrixn column with correct number
+  # Add matrixn value with correct number
   for ( nb in seq_along(results) ) { 
     results[[nb]][['matrixn']] <- nb
   }
   
   class(results) <- c('simple_sews_test_list', 'sews_test', 
-                      'sews_result_list', 'list')
+                      'sews_result_list')
   
   return(results)
 }
@@ -146,7 +146,7 @@ summary.simple_sews_test_list <- function(object,
   # spacing for us, but we effectively create a data.frame with duplicated 
   # column names. I don't know how brittle this is, but probably very. 
   header <- names(tab_pretty) 
-  header[grepl('pval_', header)] <- 'P>null'
+  header[grepl('pval_', header)] <- 'P<null'
   header[grepl('stars_', header)] <- ''
   header[grepl('matrixn', header)] <- 'Mat #'
   names(tab_pretty) <- header

@@ -2,6 +2,8 @@
 #
 #' @title Custom Spatial Early-Warning signals
 #' 
+#' @aliases custom_indicator
+#' 
 #' @description Computation, significance assessment and display of trends 
 #'   of a custom, user-defined indicator.
 #' 
@@ -18,23 +20,25 @@
 #' @return 
 #' 
 #' \code{create_indicator} returns a function that can be used in the same way 
-#'   than the other \code{*_sews} functions (e.g. \code{generic_sews})
+#'   than the other \code{*_sews} functions (e.g. \code{generic_sews}). This 
+#'   function as well as \code{compute_indicator} will return
+#'   \code{\link[=simple_sews]{simple_sews_*}} objects. 
 #' 
 #' @details 
 #' 
-#' Spatial Early-warning signals (EWS) are metrics that are based on the 
-#'   spatial structure of a system and measure the degradation of an ecological 
-#'   system. The package provides "workflow functions", named \code{*_sews}, 
+#' \code{spatialwarnings} provides "workflow functions", named \code{*_sews}, 
 #'   that assist the user in computing, displaying and assessing the 
-#'   significance of indicator values. 
-#' 
-#' \code{create_indicator} extends the package to any arbitrary function. 
-#'   It takes a function `fun` and returns another function that can be used 
+#'   significance of indicator values. The functions \code{create_indicator} and 
+#'   \code{compute_indicator} provides such workflow for any arbitrary function. 
+#'   
+#' It takes a function `fun` and returns another function that can be used 
 #'   as an indicator similar to the \code{*_sews} functions. The 
 #'   results of this function can be assessed for significance using 
 #'   \code{indictest} and trends can be displayed using 
 #'   \code{plot}, \code{summary}, etc. (see Examples). \code{compute_indicator} 
 #'   does the same but without needing an intermediate indicator function. 
+#' 
+#' @seealso \code{\link{simple_sews}}
 #' 
 #' @examples
 #' 
@@ -114,17 +118,17 @@ create_indicator <- function(fun,
                    indicf = fun)
     
     class(result) <- c('custom_sews_single', 'simple_sews_single',
-                       'sews_result_single', 'list')
+                       'sews_result_single')
     return(result)
   }
   
   # Actual function produced
   function(mat, ...) { 
     if ( is.list(mat) ) { 
-      result <- future.apply::future_lapply(mat, get_one_result, ...)
+      result <- future_lapply_seed(mat, get_one_result, ...)
       names(result) <- names(mat)
-      class(result) <- c('custom_sews_single', 'simple_sews_list',
-                         'sews_result_list', 'list')
+      class(result) <- c('custom_sews_list', 'simple_sews_list',
+                         'sews_result_list')
     } else { 
       result <- get_one_result(mat, ...)
     }

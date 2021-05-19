@@ -201,8 +201,7 @@ spectral_sews <- function(mat,
                      'spectral_sews', 
                      'simple_sews_single', 
                      'simple_sews', 
-                     'sews_result_single', 
-                     'list')
+                     'sews_result_single')
   
   return(output)
 }
@@ -226,7 +225,7 @@ spectral_sews <- function(mat,
 #'   the highest 20\% (default value), set \code{sdr_high_range} to 
 #'   \code{c(.8, 1)}. 
 #' 
-#' @return The SDR values computed on the matrix
+#' @return The SDR values computed on the matrix as a named vector
 #' 
 #' @details 
 #' 
