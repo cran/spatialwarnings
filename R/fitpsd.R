@@ -52,22 +52,21 @@ optim_safe <- function(f, pars0,
   # abnormal termination of line search). Or L-BFGS-B will try the bounds of 
   # the parameter space, which will return error. So here we try to use BFGS 
   # which should report success if our initial guess was not too bad. 
-  if ( class(optiresult) == "try-error" || 
-       optiresult[["convergence"]] > 3 ) { 
+  if ( inherits(optiresult, "try-error") || optiresult[["convergence"]] > 3 ) { 
     optiresult_bfgs <- try({ 
       optim(pars0, optimf, 
             control = list(maxit = ITERLIM), 
             method = "BFGS", ...)
     }, silent = TRUE)
-#     if (class(optiresult_bfgs) == "try-error") browser()
+    
     # If success, go with BFGS results
-    if ( class(optiresult_bfgs) != "try-error" ) { 
+    if ( inherits(optiresult_bfgs, "try-error") ) { 
       optiresult <- optiresult_bfgs
     }
   }
   
   # If we could not reach a proper solution, report an error
-  if ( class(optiresult) == "try-error" ) { 
+  if ( inherits(optiresult, "try-error") ) { 
     optiresult <- list(value  = NaN, 
                        par = rep(NaN, length(pars0)), 
                        convergence = 128) 
