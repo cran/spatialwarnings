@@ -44,12 +44,12 @@ display_size_info <- function(x, ...) {
 }
 
 # ... for sews_result_single class
-display_size_info.sews_result_single <- function(x) { 
+display_size_info.sews_result_single <- function(x, ...) { 
   display_size_info(list(x))
 }
 
 # ... for sews_result_list class
-display_size_info.sews_result_list <- display_size_info.list <- function(x) { 
+display_size_info.sews_result_list <- display_size_info.list <- function(x, ...) { 
   sizes <- sapply(x, function(x) dim(x[["orig_data"]]))
   sizes <- apply(sizes, 1, function(X) length(unique(X)) == 1)
   has_different_sizes <- ! any(sizes)
@@ -93,5 +93,5 @@ list_methods <- function(class,
 # Wrapper around future_lapply to set future.seed = TRUE so that random number 
 # generation in child processes is correct. 
 future_lapply_seed <- function(...) { 
-  future.apply::future_lapply(..., future.seed = TRUE)
+  future.apply::future_lapply(..., future.globals = FALSE, future.seed = TRUE)
 }

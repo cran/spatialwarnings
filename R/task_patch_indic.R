@@ -3,12 +3,12 @@
 #' 
 #' @description Compute early-warning signals based on patch size distributions 
 #' 
-#' @param mat A logical matrix (TRUE/FALSE values) or a list of these
+#' @param mat A logical matrix (\code{TRUE}/\code{FALSE} values) or a list of these
 #' 
 #' @param merge The default behavior is to produce indicators values for each 
 #'   matrix. If this parameter is set to TRUE then the patch size distributions 
 #'   are pooled together before fitting, yielding only one final indicator 
-#'   value for the set of matrices. 
+#'   value for the set of input matrices (argument \code{mat}).
 #' 
 #' @param fit_lnorm When patch size distributions are compared, should we 
 #'   consider lognormal type ? (see details)
@@ -16,16 +16,20 @@
 #' @param best_by The criterion to use to select the best fit (one of "AIC", 
 #'   "BIC" or "AICc")
 #' 
-#' @param xmin The xmin to be used to fit the patch size distributions. Use 
-#'   the special value "estimate" to compute first the xmin that produces 
+#' @param xmin The \eqn{x_{min}} to be used to fit the patch size distributions. Use 
+#'   the special value "estimate" to compute first the \eqn{x_{min}} that produces 
 #'   the best power-law fit, then use this estimated value to fit all 
 #'   distributions. 
 #' 
-#' @param xmin_bounds Bounds when estimating the xmin for power-law
-#'   distributions
+#' @param xmin_bounds Bounds when estimating \eqn{x_{min}} for power-law distributions
 #' 
 #' @param wrap Determines whether patches are considered to wrap around the 
 #'  matrix when reaching the side 
+#' 
+#' @param nbmask Either "moore" for 8-way neighborhood, "von_neumann" for four-way 
+#'   neighborhood (default), or a 3x3 matrix describing which neighbors to 
+#'   consider around a cell. See \code{\link{patchsizes}} for details on how to specify 
+#'   such neighborhoods.
 #' 
 #' @return A list object of class 'psdfit' containing among other things 
 #'   - the observed patch size distribution data
@@ -78,15 +82,14 @@
 #' 
 #' Results can be displayed using the text-based \code{summary} and \code{print}, 
 #' but graphical options are also available to plot the trends (\code{plot}) and 
-#' the fitted distributions ( \code{\link{plot_distr}}). Plotting functions are 
+#' the fitted distributions (\code{\link{plot_distr}}). Plotting functions are 
 #' documented in a \link[=patchdistr_sews_plot]{separate page}. Observed and 
 #' fitted distributions can be produced using the \code{predict} function, 
-#' as documented in \link[=patchdistr_sews_predict]{this page}. 
+#' as documented on \link[=patchdistr_sews_predict]{this page}. 
 #' 
 #' @seealso \code{\link{patchsizes}}, \code{\link{plot_distr}}, 
 #'   \code{\link[=predict.patchdistr_sews_single]{predict}}, 
 #'   \code{\link[=plot.patchdistr_sews]{plot}}, 
-#'   
 #' 
 #' @seealso 
 #'   \code{\link{indictest}}, to test the significance of indicator values. 
@@ -114,7 +117,7 @@
 #' 
 #' data(forestgap)
 #' 
-#' \dontrun{
+#' \donttest{
 #' psd_indic <- patchdistr_sews(forestgap)
 #' 
 #' summary(psd_indic)
@@ -138,13 +141,14 @@ patchdistr_sews <- function(mat,
                             best_by = "BIC", 
                             xmin = 1, # a number, or "estimate" option
                             xmin_bounds = NULL, 
-                            wrap = FALSE) {
+                            wrap = FALSE, 
+                            nbmask = "von_neumann") {
   
   # If input is a list -> apply on each element
-  if ( !merge & is.list(mat)) { 
+  if ( ( ! merge ) && is.list(mat)) { 
     results <- future_lapply_seed(mat, patchdistr_sews, merge,
                                   fit_lnorm, best_by, xmin,
-                                  xmin_bounds, wrap)
+                                  xmin_bounds, wrap, nbmask)
     class(results) <- c('patchdistr_sews_list', 'sews_result_list')
     return(results)
   } 
@@ -159,7 +163,7 @@ patchdistr_sews <- function(mat,
   }
   
   # Get patch size distribution
-  psd <- patchsizes(mat, merge = merge, wrap = wrap)
+  psd <- patchsizes(mat, merge = merge, wrap = wrap, nbmask = nbmask)
   
   # Set bounds to search for xmin
   if ( length(psd) > 0 && is.null(xmin_bounds) ) { 
@@ -175,13 +179,13 @@ patchdistr_sews <- function(mat,
   
   # Compute percolation 
   if ( is.list(mat) ) { 
-    percol <- lapply(mat, percolation)
+    percol <- lapply(mat, percolation, nbmask = nbmask)
     percol <- mean(unlist(percol))
-    percol_empty <- lapply(mat, function(mat) percolation(!mat))
+    percol_empty <- lapply(mat, function(mat) percolation(!mat, nbmask = nbmask))
     percol_empty <- mean(unlist(percol_empty))
   } else { 
-    percol <- percolation(mat)
-    percol_empty <- percolation(!mat)
+    percol <- percolation(mat, nbmask = nbmask)
+    percol_empty <- percolation(!mat, nbmask = nbmask)
   } 
   
   # Compute the mean cover 

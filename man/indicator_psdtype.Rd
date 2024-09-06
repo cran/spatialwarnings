@@ -11,11 +11,12 @@ indicator_psdtype(
   fit_lnorm = FALSE,
   xmin_bounds = NULL,
   best_by = "AIC",
-  wrap = FALSE
+  wrap = FALSE,
+  nbmask = "von_neumann"
 )
 }
 \arguments{
-\item{x}{A logical (TRUE/FALSE values) matrix or a list of these.}
+\item{x}{A logical (\code{TRUE}/\code{FALSE} values) matrix or a list of these.}
 
 \item{xmin}{The xmin to be used to fit the patch size distributions. Use 
 the special values "estimate" to use an estimated xmin for each fit}
@@ -34,23 +35,28 @@ the whole range of observed patch sizes)}
 
 \item{wrap}{Determines whether patches are considered to wrap around the 
 matrix when reaching the side}
+
+\item{nbmask}{Either "moore" for 8-way neighborhood, "von_neumann" for four-way 
+neighborhood (default), or a 3x3 matrix describing which neighbors to 
+consider around a cell. See \code{\link{patchsizes}} for details on how to specify 
+such neighborhoods.}
 }
 \value{
 A data.frame (or a list of these if x is a list) with the 
   following columns:
     \itemize{
-      \item `method` the method used for fitting (currently: only 
+      \item \code{method} the method used for fitting (currently: only 
          log-likelihood is implemented, "ll")
-      \item `type` the type of distribution fit
-      \item `npars` the number of parameters of the distribution type
-      \item `AIC`, `AICc` and `BIC` the values for Akaike Information 
+      \item \code{type} the type of distribution
+      \item npars the number of parameters of the distribution type
+      \item AIC, `AICc` and `BIC` the values for Akaike Information 
         Criterion (or the corrected for small samples equivalent AICc), 
         and Bayesion Information Criterion (BIC)
-      \item `best` A logical vector indicating which distribution is the 
+      \item \code{best} A logical vector indicating which distribution is the 
         best fit 
-      \item `plexpo`, `cutoff`, `meanlog`, `sdlog` the estimates for
-        distribution parameters (see \code{\link{pl_fit}})
-      \item 'percolation' A logical value indicating whether there is 
+      \item \code{plexpo}, \code{cutoff}, \code{meanlog}, \code{sdlog} the estimates
+         for distribution parameters (see \code{\link{pl_fit}})
+      \item \code{percolation} A logical value indicating whether there is 
         \code{\link{percolation}} in the system. 
     }
 }
@@ -90,7 +96,7 @@ data(forestgap)
 indicator_psdtype(forestgap[[1]])
 
 # A list of these matrices
-\dontrun{ 
+\donttest{ 
 indicator_psdtype(forestgap)
 }
 

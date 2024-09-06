@@ -7,7 +7,7 @@
 kbdm_sews(mat, subsize = 3)
 }
 \arguments{
-\item{mat}{A logical matrix (TRUE/FALSE values) or a list of logical 
+\item{mat}{A logical matrix (\code{TRUE}/\code{FALSE} values) or a list of logical 
 matrices}
 
 \item{subsize}{A submatrix size to carry out the Block Decomposition Method
@@ -37,7 +37,7 @@ be a useful indicator to anticipate transitions in model ecological
 }
 \examples{
 
-\dontrun{ 
+\donttest{ 
 
 kbdm_result <- kbdm_sews(serengeti, subsize = 3)
 plot(kbdm_result, along = serengeti.rain)

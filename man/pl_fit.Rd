@@ -24,23 +24,22 @@ distribution}
 \value{
 A list containing at list the following components: 
 
-\itemize{ 
-   \item{type: }{The type of distribution fitted (as a character string)}
-   \item{method: }{The method used for the fit - here, maximum likelihood,
-                 'll'}
-   \item{ll: }{The negative log likelihood at the estimated parameter values}
-   \item{xmin: }{The value of xmin used for the fit}
-   \item{npars: }{The number of parameters of the distribution}
+\describe{ 
+   \item{\code{type}}{The type of distribution fitted (as a character string)}
+   \item{\code{method}}{The method used for the fit - here, maximum likelihood, 'll'}
+   \item{\code{ll}}{The log likelihood at the estimated parameter values}
+   \item{\code{xmin}}{The value of xmin used for the fit}
+   \item{\code{npars}}{The number of parameters of the distribution}
  }
 
-Additionnaly, this list may have one or more of the following parameters 
-  depending on the type of distribution that has been fitted: 
-  \itemize{ 
-    \item{plexpo: }{The exponent of the power-law}
-    \item{cutoff: }{The rate of truncation, for truncated power law and 
-                exponential fits}
-    \item{meanlog: }{The mean of the lognormal distribution}
-    \item{sdlog: }{The s.d. of the lognormal distribution}
+Additionally, this list may have one or more of the following elements depending on 
+  the type of distribution that has been fitted: 
+  \describe{ 
+    \item{\code{plexpo}}{The exponent of the power-law}
+    \item{\code{cutoff}}{The rate of truncation, for truncated power law and 
+       exponential fits}
+    \item{\code{meanlog}}{The mean of the lognormal distribution}
+    \item{\code{sdlog}}{The s.d. of the lognormal distribution}
   }
 }
 \description{
@@ -66,20 +65,37 @@ In the context of distribution-fitting, 'xmin' represents the minimum value
 
 Please note that a best effort is made to have the fit converge, but 
   it may sometimes fail when the parameters are far from their usual 
-  range. It is good practice to make sure the fits are sensible when 
-  convergence warnings are reported.
+  range, and numerical issues may occur. It is good practice to make 
+  sure the fits are sensible when convergence warnings are reported.
 
 For reference, the shape of the distributions is as follow: 
 
-\itemize{
-  \item{power-law }{\eqn{x^{-a}}{x^(-a)} where a is the power-law exponent}
-  \item{exponential }{\eqn{exp(-bx)}{exp(-bx)} where b is the truncation rate
-          of the exponential } 
-  \item{truncated power-law }{\eqn{x^{-a}exp(-bx)}{x^(-a)exp(-bx)} where a
+\describe{
+  \item{power-law}{\eqn{x^{-a}}{x^(-a)} where a is the power-law exponent}
+  \item{exponential}{\eqn{exp(-bx)}{exp(-bx)} where b is the truncation rate
+          of the exponential}
+  \item{truncated power-law}{\eqn{x^{-a}exp(-bx)}{x^(-a)exp(-bx)} where a
     and b are the exponent of the power law and the rate of truncation}
 }
 
 The lognormal form follows the \link[=dlnorm]{standard definition}.
+
+The following global options can be used to change the behavior of fitting functions 
+  and/or produce more verbose output: 
+\describe{ 
+  \item{spatialwarnings.constants.reltol}{the relative tolerance to use to compute 
+    the power-law normalizing constant
+    \deqn{sum_{k=1}^{\infty} x^{ak}e^{-bk}}{sum( x^(ak)exp(-bk)) for k in 1:Inf}. 
+    Increase to increase the precision of this constant, which can be useful in some 
+    cases, typically with large sample sizes. Default is 1e-8.}
+  \item{spatialwarnings.constants.maxit}{the maximum number of iterations to compute 
+    the normalizing constant of a truncated power-law. Increase if you get a warning 
+    that the relative tolerance level (defined above) was not reached. Default is 1e8}
+  \item{spatialwarnings.debug.fit_warn_on_bound}{logical value. Warn if the fit is 
+    at the boundary of the valid range for distribution parameter}
+  \item{spatialwarnings.debug.fit_warn_on_NA}{logical value. Warn if the returned fit 
+    has \code{NA}/\code{NaN} parameters}
+}
 }
 \examples{
 
@@ -87,7 +103,7 @@ The lognormal form follows the \link[=dlnorm]{standard definition}.
 exp_fit(patchsizes(forestgap[[8]]))
  
 # Use the estimated parameters as an indicator function
-\dontrun{
+\donttest{
 
 get_truncation <- function(mat) { 
    c(exp_cutoff = exp_fit(patchsizes(mat))$cutoff)

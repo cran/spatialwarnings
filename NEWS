@@ -1,6 +1,29 @@
 
-spatialwarnings v3.0.3 (Release date: unknown)
+spatialwarnings v3.1.0 (Release date: unknown)
 ==============================================
+
+This release has received external contributions from K. Siteur
+
+Improvements: 
+  
+  * The type of neighborhood can now be specified in all patch-related functions, 
+      including high-level functions (e.g. `patchdistr_sews`). Neighborhood can also be 
+      specified using the strings "von_neumann" or "moore", on top of a 3x3 matrix
+  
+New indicators: 
+  
+  * Clustering of pairs (e.g. Schneider et al. 2016)
+  
+  * Indicators related to the LSW distribution (Siteur et al. 2023)
+
+Bug fixes and misc changes: 
+  
+  * Many documentation improvements and minor fixes 
+  
+  * Old defunct functions have been removed
+
+spatialwarnings v3.0.3 (Release date: 2022-03-21)
+=================================================
   
 This release has received external contributions from J. Guerber.
 

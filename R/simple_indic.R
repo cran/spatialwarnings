@@ -15,7 +15,7 @@
 #' @param taskname The task name. A character string used used for plots and
 #'   textual summaries that describes the indicator (or set of indicators) 
 #'   being computed. If a task name cannot be derived from \code{fun}, then 
-#'   default name is used. 
+#'   a default name is used. 
 #' 
 #' @return 
 #' 
@@ -55,7 +55,7 @@
 #' mp_indic <- maxpatch_sews(forestgap)
 #' summary(mp_indic)
 #' 
-#' \dontrun{ 
+#' \donttest{ 
 #' # Assess significance and display trends
 #' mp_test <- indictest(mp_indic, nulln = 49)
 #' plot(mp_test)
@@ -77,11 +77,11 @@
 #' cv_indic <- cv_sews(serengeti, subsize = 3)
 #' plot(cv_indic, along = serengeti.rain)
 #' 
-#' # We can do the same work in one run using compute_indicator
+#' # We can do the same work in one go using compute_indicator
 #' cv_indic2 <- compute_indicator(serengeti, spatial_cv, subsize = 3)
 #' plot(cv_indic2, along = serengeti.rain)
 #' 
-#' \dontrun{ 
+#' \donttest{ 
 #' indictest(cv_indic, nulln = 99)
 #' }
 #'@export
@@ -143,7 +143,7 @@ create_indicator <- function(fun,
 #'
 #' @param mat A matrix or a list of matrices. 
 #' 
-#' @param ... Additional arguments being passed to the function \code{fun}
+#' @param ... Additional arguments to pass to the function \code{fun}
 #' 
 #'@export
 compute_indicator <- function(mat, fun, 

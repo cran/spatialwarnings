@@ -38,45 +38,45 @@
 #'   of computations when working with multiple matrices. 
 #' 
 #' A \code{simple_sews_single} object is a list with the following components
-#'   \itemize{
-#'     \item{value: }{the indicator values. A vector of length one if there is 
+#'   \describe{
+#'     \item{\code{itemvalue}}{the indicator values. A vector of length one if there is 
 #'       only one numeric value returned by the indicator function (e.g.
 #'       \code{\link{flowlength_sews}}, or with a length above one otherwise}
-#'     \item{orig_data: }{the original matrix on which the indicator was computed} 
-#'     \item{fun.args: }{the argument used in the call to the indicator function 
+#'     \item{\code{orig_data}}{the original matrix on which the indicator was computed}
+#'     \item{\code{fun.args}}{the argument used in the call to the indicator function 
 #'       (the function that given a matrix, returns the spatial metrics of
 #'       interest)}
-#'     \item{taskname: }{a character string describing the current indicator(s) 
+#'     \item{\code{taskname}}{a character string describing the current indicator(s) 
 #'       being computed}
-#'     \item{indicf: }{the indicator function, which given the matrix, returns the
+#'     \item{\code{indicf}}{the indicator function, which given the matrix, returns the
 #'       spatial metric(s) of interest}
 #'   }
 #' 
 #'   \code{simple_sews_test_single} have all of the above components, plus 
 #' the following: 
 #' 
-#' \itemize{ 
-#'   \item{nulldistr: }{the null distribution of values, with nulln rows and 
+#' \describe{ 
+#'   \item{\code{nulldistr}}{the null distribution of values, with nulln rows and 
 #'     as many columns as the number of values returned by the indicator 
 #'     function}
-#'   \item{null_mean: }{the mean indicator values in the null distribution}
-#'   \item{null_sd: }{the standard deviation of the null distribution}
-#'   \item{null_qsup: }{the upper quantile of the null distribution, by default 
+#'   \item{\code{null_mean}}{the mean indicator values in the null distribution}
+#'   \item{\code{null_sd}}{the standard deviation of the null distribution}
+#'   \item{\code{null_qsup}}{the upper quantile of the null distribution, by default 
 #'     the 95% upper quantile, but see \code{\link{indictest}} for a way to 
 #'     adjust this}
-#'   \item{null_qinf: }{the upper quantile of the null distribution, by default 
+#'   \item{\code{null_qinf}}{the upper quantile of the null distribution, by default 
 #'     the 05% upper quantile, but see \code{\link{indictest}} for a way to 
 #'     adjust this}
-#'   \item{z_score: }{the z_score of the observed value relative to the null 
+#'   \item{\code{z_score}}{the z_score of the observed value relative to the null 
 #'     distribution, i.e. (value - null_mean) / null_sd}
-#'   \item{pval: }{the p-value of the indicator, i.e. the proporation of values 
+#'   \item{\code{pval}}{the p-value of the indicator, i.e. the proporation of values 
 #'     of the null distribution that fall below the observed indicator value}
-#'   \item{null_method: }{the method used to produce the null matrices. See 
+#'   \item{\code{null_method}}{the method used to produce the null matrices. See 
 #'     \code{\link{indictest}} for details}
-#'   \item{nulln: }{the number of null matrices used}
-#'   \item{get_nullmat: }{a function that can be called to obtain a randomized 
+#'   \item{\code{nulln}}{the number of null matrices used}
+#'   \item{\code{get_nullmat}}{a function that can be called to obtain a randomized 
 #'     matrix}
-#'   \item{matrixn: }{the number of the matrix, can be above one if the
+#'   \item{\code{matrixn}}{the number of the matrix, can be above one if the
 #'     computations have been run on a list of matrices, or non-existent if 
 #'     only one matrix was used}
 #' }

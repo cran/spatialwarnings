@@ -11,16 +11,17 @@ patchdistr_sews(
   best_by = "BIC",
   xmin = 1,
   xmin_bounds = NULL,
-  wrap = FALSE
+  wrap = FALSE,
+  nbmask = "von_neumann"
 )
 }
 \arguments{
-\item{mat}{A logical matrix (TRUE/FALSE values) or a list of these}
+\item{mat}{A logical matrix (\code{TRUE}/\code{FALSE} values) or a list of these}
 
 \item{merge}{The default behavior is to produce indicators values for each 
 matrix. If this parameter is set to TRUE then the patch size distributions 
 are pooled together before fitting, yielding only one final indicator 
-value for the set of matrices.}
+value for the set of input matrices (argument \code{mat}).}
 
 \item{fit_lnorm}{When patch size distributions are compared, should we 
 consider lognormal type ? (see details)}
@@ -28,16 +29,20 @@ consider lognormal type ? (see details)}
 \item{best_by}{The criterion to use to select the best fit (one of "AIC", 
 "BIC" or "AICc")}
 
-\item{xmin}{The xmin to be used to fit the patch size distributions. Use 
-the special value "estimate" to compute first the xmin that produces 
+\item{xmin}{The \eqn{x_{min}} to be used to fit the patch size distributions. Use 
+the special value "estimate" to compute first the \eqn{x_{min}} that produces 
 the best power-law fit, then use this estimated value to fit all 
 distributions.}
 
-\item{xmin_bounds}{Bounds when estimating the xmin for power-law
-distributions}
+\item{xmin_bounds}{Bounds when estimating \eqn{x_{min}} for power-law distributions}
 
 \item{wrap}{Determines whether patches are considered to wrap around the 
 matrix when reaching the side}
+
+\item{nbmask}{Either "moore" for 8-way neighborhood, "von_neumann" for four-way 
+neighborhood (default), or a 3x3 matrix describing which neighbors to 
+consider around a cell. See \code{\link{patchsizes}} for details on how to specify 
+such neighborhoods.}
 }
 \value{
 A list object of class 'psdfit' containing among other things 
@@ -93,16 +98,16 @@ using this best-fitting xmin:
 
 Results can be displayed using the text-based \code{summary} and \code{print}, 
 but graphical options are also available to plot the trends (\code{plot}) and 
-the fitted distributions ( \code{\link{plot_distr}}). Plotting functions are 
+the fitted distributions (\code{\link{plot_distr}}). Plotting functions are 
 documented in a \link[=patchdistr_sews_plot]{separate page}. Observed and 
 fitted distributions can be produced using the \code{predict} function, 
-as documented in \link[=patchdistr_sews_predict]{this page}.
+as documented on \link[=patchdistr_sews_predict]{this page}.
 }
 \examples{
 
 data(forestgap)
 
-\dontrun{
+\donttest{
 psd_indic <- patchdistr_sews(forestgap)
 
 summary(psd_indic)

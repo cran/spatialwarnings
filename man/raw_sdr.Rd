@@ -8,7 +8,7 @@ raw_sdr(mat, sdr_low_range = NULL, sdr_high_range = NULL)
 }
 \arguments{
 \item{mat}{A matrix with continuous values, or a logical matrix 
-(TRUE/FALSE).}
+(\code{TRUE}/\code{FALSE} values).}
 
 \item{sdr_low_range}{The range of values (in proportion) to 
 use for the computation of the spectral density ratio.
@@ -43,7 +43,7 @@ Low and high frequencies are averaged in order to compute the SDR. The
 }
 \examples{
 
-\dontrun{ 
+\donttest{ 
 data(serengeti)
 serengeti.sdr <- raw_sdr(serengeti[[1]], 
                          sdr_low_range = c(0, 0.2), 

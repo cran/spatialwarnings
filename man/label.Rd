@@ -5,20 +5,17 @@
 \alias{percolation}
 \title{Labelling of unique patches and detection of percolation.}
 \usage{
-label(
-  mat,
-  nbmask = matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), ncol = 3),
-  wrap = FALSE
-)
+label(mat, nbmask = "von_neumann", wrap = FALSE)
 
-percolation(mat, nbmask = matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), ncol = 3))
+percolation(mat, nbmask = "von_neumann")
 }
 \arguments{
 \item{mat}{A binary matrix}
 
-\item{nbmask}{a "neighboring mask": a matrix with odd dimensions describing
-which cells are to be considered as neighbors around a cell 
-(see examples).}
+\item{nbmask}{Either "moore" for 8-way neighborhood, "von_neumann" for four-way 
+neighborhood (default), or a 3x3 matrix describing which neighbors to 
+consider around a cell. See \code{\link{patchsizes}} for details on how to specify 
+such neighborhoods.}
 
 \item{wrap}{Whether to wrap around lattice boundaries (`TRUE`/`FALSE`), 
 effectively using periodic boundaries.}
@@ -39,7 +36,7 @@ Label each patch with a number in a binary matrix
 }
 \details{
 The \code{label} function "labels" the patches of a binary 
-  (TRUE/FALSE) matrix. It returns a matrix of similar height and width, 
+  (\code{TRUE}/\code{FALSE}) matrix. It returns a matrix of similar height and width, 
   with integer values representing the ID of each unique patch (contiguous
    cells). Empty cells are labelled as \code{NA}.
 }
@@ -51,13 +48,10 @@ rmat <- matrix(rnorm(100) > .1, ncol = 10)
 display_matrix(label(rmat))
 
 # With 8-way neighborhood mask and no wrapping around borders
-nbmask8 <- matrix(c(1,1,1,
-                    1,0,1,
-                    1,1,1), ncol=3)
-display_matrix(label(rmat, nbmask8, wrap = FALSE))
+display_matrix(label(rmat, "moore", wrap = FALSE))
 
 # On real data: 
-display_matrix(label(forestgap[[5]], nbmask8, wrap = FALSE))
+display_matrix(label(forestgap[[5]], "moore", wrap = FALSE))
 
 }
 \seealso{

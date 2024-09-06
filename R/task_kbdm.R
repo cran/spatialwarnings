@@ -34,7 +34,7 @@
 #'   changes in the dynamics of ecological systems under stress. Ecological 
 #'   Complexity 32:144-155. 
 #'   
-#' @param mat A logical matrix (TRUE/FALSE values) or a list of logical 
+#' @param mat A logical matrix (\code{TRUE}/\code{FALSE} values) or a list of logical 
 #'   matrices
 #' 
 #' @param subsize A submatrix size to carry out the Block Decomposition Method
@@ -45,7 +45,7 @@
 #' 
 #' @examples 
 #' 
-#' \dontrun{ 
+#' \donttest{ 
 #' 
 #' kbdm_result <- kbdm_sews(serengeti, subsize = 3)
 #' plot(kbdm_result, along = serengeti.rain)
@@ -94,7 +94,7 @@ kbdm_sews <- function(mat, subsize = 3) {
 #' 
 #' @examples 
 #' 
-#' \dontrun{ 
+#' \donttest{ 
 #' raw_kbdm(forestgap[[1]], subsize = 3)
 #' }
 #' 

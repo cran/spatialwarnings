@@ -12,7 +12,7 @@
 #'  the patches contained in a matrix. The distributions are returned with 
 #'  their corresponding AIC, BIC and AICc to select the best fit.
 #'  
-#' @param x A logical (TRUE/FALSE values) matrix or a list of these. 
+#' @param x A logical (\code{TRUE}/\code{FALSE} values) matrix or a list of these. 
 #' 
 #' @param xmin The xmin to be used to fit the patch size distributions. Use 
 #'   the special values "estimate" to use an estimated xmin for each fit
@@ -32,21 +32,26 @@
 #' @param wrap Determines whether patches are considered to wrap around the 
 #'  matrix when reaching the side 
 #' 
+#' @param nbmask Either "moore" for 8-way neighborhood, "von_neumann" for four-way 
+#'   neighborhood (default), or a 3x3 matrix describing which neighbors to 
+#'   consider around a cell. See \code{\link{patchsizes}} for details on how to specify 
+#'   such neighborhoods.
+#' 
 #' @return A data.frame (or a list of these if x is a list) with the 
 #'   following columns:
 #'     \itemize{
-#'       \item `method` the method used for fitting (currently: only 
+#'       \item \code{method} the method used for fitting (currently: only 
 #'          log-likelihood is implemented, "ll")
-#'       \item `type` the type of distribution fit
-#'       \item `npars` the number of parameters of the distribution type
-#'       \item `AIC`, `AICc` and `BIC` the values for Akaike Information 
+#'       \item \code{type} the type of distribution
+#'       \item npars the number of parameters of the distribution type
+#'       \item AIC, `AICc` and `BIC` the values for Akaike Information 
 #'         Criterion (or the corrected for small samples equivalent AICc), 
 #'         and Bayesion Information Criterion (BIC)
-#'       \item `best` A logical vector indicating which distribution is the 
+#'       \item \code{best} A logical vector indicating which distribution is the 
 #'         best fit 
-#'       \item `plexpo`, `cutoff`, `meanlog`, `sdlog` the estimates for
-#'         distribution parameters (see \code{\link{pl_fit}})
-#'       \item 'percolation' A logical value indicating whether there is 
+#'       \item \code{plexpo}, \code{cutoff}, \code{meanlog}, \code{sdlog} the estimates
+#'          for distribution parameters (see \code{\link{pl_fit}})
+#'       \item \code{percolation} A logical value indicating whether there is 
 #'         \code{\link{percolation}} in the system. 
 #'     }
 #' 
@@ -99,7 +104,7 @@
 #' indicator_psdtype(forestgap[[1]])
 #' 
 #' # A list of these matrices
-#' \dontrun{ 
+#' \donttest{ 
 #' indicator_psdtype(forestgap)
 #' }
 #'
@@ -110,11 +115,12 @@ indicator_psdtype <- function(x,
                               fit_lnorm = FALSE,
                               xmin_bounds = NULL, 
                               best_by = "AIC", 
-                              wrap = FALSE) { 
+                              wrap = FALSE, 
+                              nbmask = "von_neumann") { 
   
   if ( !merge && is.list(x) ) { 
     return( lapply(x, indicator_psdtype, xmin, merge, fit_lnorm, xmin_bounds, 
-                   best_by, wrap) )
+                   best_by, wrap, nbmask) )
   } 
   
   # Here we do not test if x is not a matrix. This happens when merge = TRUE, 
@@ -134,19 +140,19 @@ indicator_psdtype <- function(x,
   }
   
   # Compute psd
-  psd <- patchsizes(x, merge = merge, wrap = wrap)
+  psd <- patchsizes(x, merge = merge, wrap = wrap, nbmask = nbmask)
   
   # Compute percolation point. If the user requested a merge of all 
   #   patch size distributions, then we return the proportion of matrices 
   #   with percolation. 
   if ( is.list(x) ) { 
-    percol <- lapply(x, percolation)
+    percol <- lapply(x, percolation, nbmask = nbmask)
     percol <- mean(unlist(percol))
-    percol_empty <- lapply(x, function(x) percolation(!x))
+    percol_empty <- lapply(x, function(x) percolation(!x, nbmask = nbmask))
     percol_empty <- mean(unlist(percol_empty))
   } else { 
-    percol <- percolation(x)
-    percol_empty <- percolation(!x)
+    percol <- percolation(x, nbmask = nbmask)
+    percol_empty <- percolation(!x, nbmask = nbmask)
   } 
   
   psdtype_result <- psdtype(psd, xmin, best_by, fit_lnorm)
