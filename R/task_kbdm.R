@@ -102,12 +102,8 @@ kbdm_sews <- function(mat, subsize = 3) {
 raw_kbdm <- function(mat, subsize) {
   
   if ( ! requireNamespace("acss") ) { 
-    stop(paste0('Computation of kbdm requires the package acss. Install it ', 
-                'using install.packages("acss")'))
-  }
-  
-  if ( subsize > 3 || subsize < 1 ) { 
-    stop("subsize must be between 1 and 3.")
+    stop(paste0('Computation of kbdm requires the acss package. You can install it ',
+                'using the command install.packages("acss")'))
   }
   
   # Split matrix
@@ -133,4 +129,3 @@ raw_kbdm <- function(mat, subsize) {
   # Compute Kbdm
   return( c(kbdm = with(counts, sum(log2(multip) + kctm))) )
 }
-  
