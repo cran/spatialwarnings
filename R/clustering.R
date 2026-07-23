@@ -137,8 +137,14 @@ pair_counts <- function(mat,
   }
 
   # Make a semi-triangular matrix
-  pairs[lower.tri(pairs)] <- pairs[upper.tri(pairs)] + pairs[lower.tri(pairs)]
-  pairs[upper.tri(pairs)] <- NA
+  for ( row in seq(1, nrow(pairs)-1) ) {
+    for ( col in seq(row+1, ncol(pairs)) ) {
+      pairs[col, row] <- pairs[col, row] + pairs[row, col]
+      pairs[row, col] <- NA
+    }
+  }
+#   pairs[lower.tri(pairs)] <- pairs[upper.tri(pairs)] + pairs[lower.tri(pairs)]
+#   pairs[upper.tri(pairs)] <- NA
 
   return(pairs)
 }
@@ -156,7 +162,7 @@ format_mat_for_pair_count <- function(mat) {
 
   if ( is.logical(mat) ) {
     dims <- dim(mat)
-    mat <- factor(c("TRUE", "FALSE")[mat+1], levels = c("TRUE", "FALSE"))
+    mat <- factor(c("FALSE", "TRUE")[mat+1], levels = c("TRUE", "FALSE"))
     dim(mat) <- dims
   }
 

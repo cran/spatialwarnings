@@ -87,30 +87,30 @@ BEGIN_RCPP
 END_RCPP
 }
 // tplsum
-arma::vec tplsum(double expo, double rate, arma::ivec xs, int xmin);
+arma::vec tplsum(const double expo, const double rate, const arma::ivec xs, const int xmin);
 RcppExport SEXP _spatialwarnings_tplsum(SEXP expoSEXP, SEXP rateSEXP, SEXP xsSEXP, SEXP xminSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type expo(expoSEXP);
-    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
-    Rcpp::traits::input_parameter< arma::ivec >::type xs(xsSEXP);
-    Rcpp::traits::input_parameter< int >::type xmin(xminSEXP);
+    Rcpp::traits::input_parameter< const double >::type expo(expoSEXP);
+    Rcpp::traits::input_parameter< const double >::type rate(rateSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec >::type xs(xsSEXP);
+    Rcpp::traits::input_parameter< const int >::type xmin(xminSEXP);
     rcpp_result_gen = Rcpp::wrap(tplsum(expo, rate, xs, xmin));
     return rcpp_result_gen;
 END_RCPP
 }
 // tplinfsum
-double tplinfsum(double expo, double rate, double xmin, arma::uword maxit, double reltol);
+double tplinfsum(const double expo, const double rate, const double xmin, const arma::uword maxit, const double reltol);
 RcppExport SEXP _spatialwarnings_tplinfsum(SEXP expoSEXP, SEXP rateSEXP, SEXP xminSEXP, SEXP maxitSEXP, SEXP reltolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type expo(expoSEXP);
-    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
-    Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type maxit(maxitSEXP);
-    Rcpp::traits::input_parameter< double >::type reltol(reltolSEXP);
+    Rcpp::traits::input_parameter< const double >::type expo(expoSEXP);
+    Rcpp::traits::input_parameter< const double >::type rate(rateSEXP);
+    Rcpp::traits::input_parameter< const double >::type xmin(xminSEXP);
+    Rcpp::traits::input_parameter< const arma::uword >::type maxit(maxitSEXP);
+    Rcpp::traits::input_parameter< const double >::type reltol(reltolSEXP);
     rcpp_result_gen = Rcpp::wrap(tplinfsum(expo, rate, xmin, maxit, reltol));
     return rcpp_result_gen;
 END_RCPP
